@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Football Broadcast Graphic - Transparent SSE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --home-color: #ff2a5f;
+      --away-color: #00e5ff;
+      --font-titles: 'Bebas Neue', sans-serif;
+      --font-info: 'Rajdhani', sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-info);
+      background-color: transparent; /* Absolutely transparent for OBS layering */
+      color: #ffffff;
+      overflow: hidden; 
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .broadcast-container {
+      position: relative; width: 100vw; height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      perspective: 2000px;
+    }
+
+    /* Cinematic Camera */
+    .camera-rig {
+      position: absolute; width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center;
+      transform-style: preserve-3d; z-index: 10;
+    }
+    
+    .scene-3d.active .camera-rig { animation: cameraDolly 15s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+    .scene-3d.exit .camera-rig { animation: cameraDollyOut 1.2s cubic-bezier(0.5, 0, 0.2, 1) forwards; }
+
+    .gfx-wrapper {
+      position: relative;
+      transform: scale(0.9) translateY(-50px); 
+      width: 1400px; height: 800px;
+      display: flex; justify-content: center; align-items: center;
+      transform-style: preserve-3d;
+    }
+
+    .floor-shadow {
+      position: absolute; bottom: -150px;
+      width: 1800px; height: 400px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, transparent 70%);
+      transform: rotateX(85deg) translateZ(-150px);
+      filter: blur(25px); opacity: 0;
+      transition: opacity 2s ease-in-out;
+    }
+    .scene-3d.active .floor-shadow { opacity: 1; transition-delay: 1s; }
+    .scene-3d.exit .floor-shadow { opacity: 0; transition-delay: 0s; transition-duration: 0.5s; }
+
+    .scene-3d {
+      position: absolute; width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center;
+      transform-style: preserve-3d;
+    }
+    
+    /* Panels */
+    .team-panel {
+      position: absolute; width: 420px; height: 600px;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transform-style: preserve-3d; opacity: 0;
+      will-change: transform, opacity;
+    }
+    
+    .team-panel::after {
+      content: ''; position: absolute; inset: 0;
+      border-radius: 20px; z-index: -2;
+      transform: translateZ(-20px); 
+      background: #050508;
+    }
+
+    .team-panel::before {
+      content: ''; position: absolute; inset: -4px;
+      border-radius: 24px; z-index: -1; transform: translateZ(-10px);
+    }
+
+    .home-panel {
+      background: linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(5,5,10,0.95) 100%);
+      transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); 
+    }
+    .home-panel::before { background: linear-gradient(135deg, var(--home-color), rgba(255,255,255,0.2), transparent); box-shadow: 0 0 40px var(--home-color); }
+    
+    .scene-3d.active .home-panel { animation: cinematicFlyInLeft 2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .scene-3d.exit .home-panel { animation: cinematicFlyOutLeft 1.2s cubic-bezier(0.8, 0, 0.2, 1) forwards 0.2s; }
+
+    .away-panel {
+      background: linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(5,5,10,0.95) 100%);
+      transform: translateX(1000px) translateZ(1000px) rotateY(-90deg);
+    }
+    .away-panel::before { background: linear-gradient(135deg, var(--away-color), rgba(255,255,255,0.2), transparent); box-shadow: 0 0 40px var(--away-color); }
+    
+    .scene-3d.active .away-panel { animation: cinematicFlyInRight 2s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s; }
+    .scene-3d.exit .away-panel { animation: cinematicFlyOutRight 1.2s cubic-bezier(0.8, 0, 0.2, 1) forwards 0.1s; }
+
+    /* Logos */
+    .team-logo-container {
+      width: 360px; height: 360px; display: flex; justify-content: center; align-items: center;
+      transform: translateZ(50px) scale(0) rotateY(180deg); 
+      opacity: 0; will-change: transform, opacity;
+    }
+    .scene-3d.active .team-logo-container { animation: logoSpinIn 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards 1s; }
+    .scene-3d.exit .team-logo-container { animation: logoSpinOut 1s cubic-bezier(0.8, 0, 0.2, 1) forwards 0s; }
+
+    .team-logo {
+      max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 50%;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.2);
+    }
+
+    /* Team Names */
+    .team-name {
+      font-family: var(--font-titles);
+      font-size: 5rem; letter-spacing: 2px;
+      margin-top: 20px; text-align: center;
+      transform: translateZ(80px) translateY(100px) rotateX(-90deg);
+      opacity: 0; color: #fff; transform-origin: bottom;
+    }
+    .scene-3d.active .team-name { animation: textFlipUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards 1.8s; }
+    .scene-3d.exit .team-name { animation: textFlipDown 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards 0s; }
+    
+    .home-panel .team-name { text-shadow: 0 1px 0 #999, 0 2px 0 #888, 0 3px 0 #777, 0 4px 0 #666, 0 5px 0 #555, 0 20px 20px rgba(0,0,0,0.9), 0 0 30px var(--home-color); }
+    .away-panel .team-name { text-shadow: 0 1px 0 #999, 0 2px 0 #888, 0 3px 0 #777, 0 4px 0 #666, 0 5px 0 #555, 0 20px 20px rgba(0,0,0,0.9), 0 0 30px var(--away-color); }
+
+    /* Central Info */
+    .center-panel {
+      position: absolute; width: 450px; display: flex; flex-direction: column; align-items: center;
+      transform: translateY(-400px) scale(0.5); opacity: 0; transform-style: preserve-3d;
+    }
+    .scene-3d.active .center-panel { animation: centerDropIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards 1.2s; }
+    .scene-3d.exit .center-panel { animation: centerDropOut 1.2s cubic-bezier(0.5, 0, 0.2, 1) forwards 0.2s; }
+
+    .match-info-glass {
+      background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(5, 5, 10, 1) 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-top: 4px solid #fff;
+      padding: 15px 40px; border-radius: 10px; text-align: center;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+      width: 100%; margin-bottom: 20px; transform-style: preserve-3d;
+    }
+
+    .league-name { font-size: 1.4rem; color: #aaa; letter-spacing: 5px; font-weight: 700; transform: translateZ(20px); }
+    .match-day { font-family: var(--font-titles); font-size: 3rem; color: #fff; transform: translateZ(40px); letter-spacing: 2px; }
+
+    /* VS Badge */
+    .vs-badge {
+      font-family: var(--font-titles); font-size: 8rem; line-height: 1;
+      color: #fff; text-shadow: 0 2px 0 #ccc, 0 4px 0 #aaa, 0 6px 0 #888, 0 8px 0 #666, 0 30px 30px rgba(0,0,0,0.9);
+      margin: 10px 0; position: relative;
+      transform: translateZ(0px) scale(4); opacity: 0;
+    }
+    .scene-3d.active .vs-badge { animation: vsSlamIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards 2s; }
+    .scene-3d.exit .vs-badge { animation: vsSlamOut 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards 0s; }
+
+    /* ==================================================
+       ANIMATION KEYFRAMES 
+       ================================================== */
+       
+    /* IN ANIMATIONS */
+    @keyframes cameraDolly {
+      0% { transform: translateZ(600px); }
+      100% { transform: translateZ(0px); }
+    }
+    @keyframes cinematicFlyInLeft {
+      0% { transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); opacity: 0; }
+      100% { transform: translateX(-500px) translateZ(50px) rotateY(15deg) rotateX(2deg); opacity: 1; }
+    }
+    @keyframes cinematicFlyInRight {
+      0% { transform: translateX(1000px) translateZ(1000px) rotateY(-90deg); opacity: 0; }
+      100% { transform: translateX(500px) translateZ(50px) rotateY(-15deg) rotateX(2deg); opacity: 1; }
+    }
+    @keyframes logoSpinIn {
+      0% { transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0; }
+      100% { transform: translateZ(140px) scale(1) rotateY(0deg); opacity: 1; }
+    }
+    @keyframes textFlipUp {
+      0% { transform: translateZ(80px) translateY(100px) rotateX(-90deg); opacity: 0; }
+      100% { transform: translateZ(100px) translateY(0) rotateX(0deg); opacity: 1; }
+    }
+    @keyframes centerDropIn {
+      0% { transform: translateY(-600px) translateZ(0px) scale(0.5); opacity: 0; }
+      100% { transform: translateY(0) translateZ(150px) scale(1); opacity: 1; }
+    }
+    @keyframes vsSlamIn {
+      0% { transform: translateZ(400px) scale(4); opacity: 0; }
+      100% { transform: translateZ(120px) scale(1); opacity: 1; }
+    }
+
+    /* OUT ANIMATIONS (PLAY OUT) - CLEAN AND CLASSY */
+    @keyframes cameraDollyOut {
+      0% { transform: translateZ(0px); }
+      100% { transform: translateZ(600px); } /* Mirrors the intro dolly */
+    }
+    @keyframes cinematicFlyOutLeft {
+      0% { transform: translateX(-500px) translateZ(50px) rotateY(15deg) rotateX(2deg); opacity: 1; }
+      100% { transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); opacity: 0; }
+    }
+    @keyframes cinematicFlyOutRight {
+      0% { transform: translateX(500px) translateZ(50px) rotateY(-15deg) rotateX(2deg); opacity: 1; }
+      100% { transform: translateX(1000px) translateZ(1000px) rotateY(-90deg); opacity: 0; }
+    }
+    @keyframes logoSpinOut {
+      0% { transform: translateZ(140px) scale(1) rotateY(0deg); opacity: 1; }
+      100% { transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0; }
+    }
+    @keyframes textFlipDown {
+      0% { transform: translateZ(100px) translateY(0) rotateX(0deg); opacity: 1; }
+      100% { transform: translateZ(80px) translateY(100px) rotateX(-90deg); opacity: 0; }
+    }
+    @keyframes centerDropOut {
+      0% { transform: translateY(0) translateZ(150px) scale(1); opacity: 1; }
+      100% { transform: translateY(-600px) translateZ(0px) scale(0.5); opacity: 0; }
+    }
+    @keyframes vsSlamOut {
+      0% { transform: translateZ(120px) scale(1); opacity: 1; }
+      100% { transform: translateZ(400px) scale(4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="broadcast-container">
+    <!-- Removed Stadium Bg & Fog overlays entirely for true transparency -->
+
+    <div class="scene-3d" id="scene3d">
+      <div class="camera-rig">
+        <div class="gfx-wrapper">
+          
+          <div class="team-panel home-panel">
+            <div class="team-logo-container">
+              <img src="home_logo.jpg" alt="Home Logo" id="homeLogoImg" class="team-logo" />
+            </div>
+            <div class="team-name" id="homeNameText">RED DEVILS</div>
+          </div>
+
+          <div class="center-panel">
+            <div class="match-info-glass">
+              <div class="league-name" id="leagueNameText">Premier Championship</div>
+              <div class="match-day" id="matchdayText">MATCHDAY 24</div>
+            </div>
+            
+            <div class="vs-badge">VS</div>
+            
+            <div class="match-info-glass" style="padding: 10px 30px">
+              <div class="league-name" style="font-size: 1rem">KICK-OFF</div>
+              <div class="match-day" style="font-size: 2rem" id="kickoffTimeText">20:45 CET</div>
+            </div>
+          </div>
+
+          <div class="team-panel away-panel">
+            <div class="team-logo-container">
+              <img src="away_logo.jpg" alt="Away Logo" id="awayLogoImg" class="team-logo" />
+            </div>
+            <div class="team-name" id="awayNameText">BLUE EAGLES</div>
+          </div>
+          
+          <div class="floor-shadow"></div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Parse URL parameter to join specific match room, default to 'default'
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchId = urlParams.get('match') || 'default';
+    
+    // Connect to SSE Server (No dependencies!)
+    const eventSource = new EventSource(`/events?match=${matchId}`);
+    
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === 'UPDATE_TEXT') {
+        if(data.homeName) document.getElementById('homeNameText').innerText = data.homeName;
+        if(data.awayName) document.getElementById('awayNameText').innerText = data.awayName;
+        if(data.leagueName) document.getElementById('leagueNameText').innerText = data.leagueName;
+        if(data.matchday) document.getElementById('matchdayText').innerText = data.matchday;
+        if(data.kickoffTime) document.getElementById('kickoffTimeText').innerText = data.kickoffTime;
+        
+        // Update custom CSS colors
+        if(data.homeColor) document.documentElement.style.setProperty('--home-color', data.homeColor);
+        if(data.awayColor) document.documentElement.style.setProperty('--away-color', data.awayColor);
+
+        // Update Logos if Base64 data is provided
+        if(data.homeLogoData) document.getElementById('homeLogoImg').src = data.homeLogoData;
+        if(data.awayLogoData) document.getElementById('awayLogoImg').src = data.awayLogoData;
+      }
+      
+      if (data.type === 'ANIMATE_IN') {
+        const scene = document.getElementById('scene3d');
+        scene.classList.remove('exit');
+        scene.classList.remove('active');
+        void scene.offsetWidth; 
+        scene.classList.add('active');
+      }
+      
+      if (data.type === 'ANIMATE_OUT') {
+        const scene = document.getElementById('scene3d');
+        scene.classList.remove('active');
+        void scene.offsetWidth; 
+        scene.classList.add('exit');
+      }
+    };
+
+    // Auto animate in
+    setTimeout(() => {
+      document.getElementById('scene3d').classList.add('active');
+    }, 500);
+  </script>
+</body>
+</html>

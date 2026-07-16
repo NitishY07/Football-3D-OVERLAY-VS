@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Football GFX Controller</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1a1a1a; color: #fff; padding: 20px; }
+    .container { max-width: 500px; margin: 0 auto; background: #2a2a2a; padding: 20px; border-radius: 10px; }
+    h1 { font-size: 1.5rem; margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; }
+    .match-id { font-size: 0.9rem; color: #00ff88; margin-top: -5px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #aaa; }
+    input[type="text"] { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: #fff; border-radius: 5px; box-sizing: border-box; }
+    .color-picker { display: flex; align-items: center; gap: 10px; }
+    input[type="color"] { width: 50px; height: 40px; border: none; background: transparent; cursor: pointer; }
+    input[type="file"] { margin-top: 5px; color: #ccc; }
+    .btn { display: block; width: 100%; padding: 15px; background: #00e5ff; color: #000; border: none; font-size: 1.1rem; font-weight: bold; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
+    .btn-red { background: #ff2a5f; color: #fff; }
+    .btn-green { background: #00ff88; color: #000; }
+    .flex-row { display: flex; gap: 10px; }
+    .flex-row > div { flex: 1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Broadcast Controller</h1>
+    <div class="match-id" id="matchIdDisplay">Match ID: default</div>
+    
+    <div class="flex-row">
+      <div class="form-group">
+        <label>Home Team</label>
+        <input type="text" id="homeName" value="RED DEVILS" />
+        <div class="color-picker">
+          <input type="color" id="homeColor" value="#ff2a5f">
+          <label style="margin:0">Theme Color</label>
+        </div>
+        <label style="margin-top:10px">Upload Custom Logo:</label>
+        <input type="file" id="homeLogo" accept="image/*" />
+      </div>
+      
+      <div class="form-group">
+        <label>Away Team</label>
+        <input type="text" id="awayName" value="BLUE EAGLES" />
+        <div class="color-picker">
+          <input type="color" id="awayColor" value="#00e5ff">
+          <label style="margin:0">Theme Color</label>
+        </div>
+        <label style="margin-top:10px">Upload Custom Logo:</label>
+        <input type="file" id="awayLogo" accept="image/*" />
+      </div>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
+
+    <div class="form-group">
+      <label>League Name</label>
+      <input type="text" id="leagueName" value="PREMIER CHAMPIONSHIP" />
+    </div>
+    <div class="form-group">
+      <label>Matchday Info</label>
+      <input type="text" id="matchday" value="MATCHDAY 24" />
+    </div>
+    <div class="form-group">
+      <label>Time</label>
+      <input type="text" id="kickoffTime" value="20:45 CET" />
+    </div>
+    
+    <button class="btn btn-green" onclick="sendUpdate()">Apply Text & Colors</button>
+    
+    <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
+
+    <div style="display: flex; gap: 10px;">
+      <button class="btn" onclick="animateIn()" style="flex: 1">PLAY IN</button>
+      <button class="btn btn-red" onclick="animateOut()" style="flex: 1">PLAY OUT</button>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const matchId = urlParams.get('match') || 'default';
+    document.getElementById('matchIdDisplay').innerText = `Controlling Match ID: ${matchId}`;
+
+    function getBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    async function sendActionToServer(payload) {
+      payload.matchId = matchId;
+      try {
+        await fetch('/action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (err) {
+        console.error('Failed to send action:', err);
+      }
+    }
+
+    async function sendUpdate() {
+      const payload = {
+        type: 'UPDATE_TEXT',
+        homeName: document.getElementById('homeName').value,
+        awayName: document.getElementById('awayName').value,
+        leagueName: document.getElementById('leagueName').value,
+        matchday: document.getElementById('matchday').value,
+        kickoffTime: document.getElementById('kickoffTime').value,
+        homeColor: document.getElementById('homeColor').value,
+        awayColor: document.getElementById('awayColor').value,
+      };
+
+      const homeLogoFile = document.getElementById('homeLogo').files[0];
+      if (homeLogoFile) {
+        payload.homeLogoData = await getBase64(homeLogoFile);
+      }
+      
+      const awayLogoFile = document.getElementById('awayLogo').files[0];
+      if (awayLogoFile) {
+        payload.awayLogoData = await getBase64(awayLogoFile);
+      }
+
+      sendActionToServer(payload);
+    }
+
+    function animateIn() {
+      sendActionToServer({ type: 'ANIMATE_IN' });
+    }
+
+    function animateOut() {
+      sendActionToServer({ type: 'ANIMATE_OUT' });
+    }
+
+    window.onload = () => sendUpdate();
+  </script>
+</body>
+</html>

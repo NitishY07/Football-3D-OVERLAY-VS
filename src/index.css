@@ -1,0 +1,333 @@
+:root {
+  --primary-red: #e62429;
+  --dark-red: #9e141d;
+  --primary-blue: #0b224f;
+  --light-blue: #1b428d;
+  --glass-bg: rgba(10, 10, 15, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.15);
+  --glass-highlight: rgba(255, 255, 255, 0.4);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a5b0;
+  --gold: #d4af37;
+  
+  --font-main: 'Outfit', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: #000;
+  color: var(--text-primary);
+  overflow: hidden; /* For broadcast graphic, we don't want scrollbars */
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Background Setup */
+.broadcast-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1200px;
+}
+
+.stadium-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  filter: brightness(0.6) blur(2px);
+  transform: scale(1.1); /* Slight scale for camera move */
+  animation: bgPan 15s ease-out forwards;
+}
+
+/* Cinematic fog overlay */
+.fog-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, transparent 20%, rgba(0, 0, 0, 0.7) 100%);
+  z-index: 2;
+  mix-blend-mode: multiply;
+}
+
+.volumetric-light {
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 120%;
+  background: radial-gradient(ellipse at top, rgba(255,255,255,0.15) 0%, transparent 60%);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* 3D Scene Wrapper */
+.scene-3d {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+  animation: sceneEnter 4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Components */
+.team-panel {
+  position: absolute;
+  width: 400px;
+  height: 550px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.5), 
+              inset 0 1px 0 var(--glass-highlight);
+  transform-style: preserve-3d;
+  overflow: hidden;
+}
+
+.team-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+  z-index: -1;
+}
+
+/* Metallic Edge */
+.team-panel::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 21px;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4), transparent, rgba(255,255,255,0.1));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.home-panel {
+  transform: translateX(-450px) rotateY(15deg) translateZ(100px);
+  animation: panelHomeEnter 2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both;
+  box-shadow: 0 0 50px rgba(230, 36, 41, 0.2);
+}
+
+.away-panel {
+  transform: translateX(450px) rotateY(-15deg) translateZ(100px);
+  animation: panelAwayEnter 2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both;
+  box-shadow: 0 0 50px rgba(11, 34, 79, 0.3);
+}
+
+.team-logo-container {
+  width: 280px;
+  height: 280px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translateZ(50px); /* 3D pop effect */
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6));
+  animation: logoFloat 6s ease-in-out infinite alternate;
+}
+
+.team-logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  mix-blend-mode: hard-light;
+}
+
+.team-name {
+  font-size: 3rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 30px;
+  transform: translateZ(30px);
+  text-align: center;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+}
+
+.team-subtitle {
+  font-size: 1.2rem;
+  color: var(--gold);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  transform: translateZ(20px);
+  margin-top: 10px;
+}
+
+/* Central Info Panel */
+.center-panel {
+  position: absolute;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateZ(50px);
+  animation: centerEnter 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 1.5s both;
+}
+
+.vs-badge {
+  font-size: 3.5rem;
+  font-weight: 900;
+  font-style: italic;
+  background: linear-gradient(to bottom, #ffffff, #a0a5b0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 5px 15px rgba(0,0,0,0.8));
+  margin: 30px 0;
+  position: relative;
+}
+
+.vs-badge::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -80px;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.5));
+}
+
+.vs-badge::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -80px;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(to left, transparent, rgba(255,255,255,0.5));
+}
+
+.match-info-glass {
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 15px 30px;
+  border-radius: 30px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.league-name {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.match-day {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+/* Recent Form */
+.form-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+.form-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.form-w { background-color: #2e8b57; }
+.form-d { background-color: #708090; }
+.form-l { background-color: #dc143c; }
+
+/* Light Streaks / Particles */
+.particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.streak {
+  position: absolute;
+  width: 150px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  opacity: 0;
+}
+
+/* Keyframes */
+@keyframes bgPan {
+  0% { transform: scale(1.1) translateY(20px); }
+  100% { transform: scale(1.05) translateY(0); }
+}
+
+@keyframes sceneEnter {
+  0% { transform: scale(1.5) translateZ(-500px); opacity: 0; }
+  100% { transform: scale(1) translateZ(0); opacity: 1; }
+}
+
+@keyframes panelHomeEnter {
+  0% { transform: translateX(-800px) translateY(200px) rotateY(30deg) translateZ(0px); opacity: 0; }
+  100% { transform: translateX(-450px) rotateY(15deg) translateZ(100px); opacity: 1; }
+}
+
+@keyframes panelAwayEnter {
+  0% { transform: translateX(800px) translateY(200px) rotateY(-30deg) translateZ(0px); opacity: 0; }
+  100% { transform: translateX(450px) rotateY(-15deg) translateZ(100px); opacity: 1; }
+}
+
+@keyframes centerEnter {
+  0% { transform: translateZ(-200px) scale(0.5); opacity: 0; }
+  100% { transform: translateZ(50px) scale(1); opacity: 1; }
+}
+
+@keyframes logoFloat {
+  0% { transform: translateZ(50px) translateY(0px); }
+  100% { transform: translateZ(70px) translateY(-10px); }
+}
