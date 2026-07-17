@@ -6,7 +6,7 @@
   <title>Football GFX Controller</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1a1a1a; color: #fff; padding: 10px; margin: 0; }
-    .container { max-width: 800px; margin: 0 auto; background: #2a2a2a; padding: 20px; border-radius: 10px; }
+    .container { max-width: 900px; margin: 0 auto; background: #2a2a2a; padding: 20px; border-radius: 10px; }
     h1 { font-size: 1.5rem; margin-top: 0; padding-bottom: 10px; text-align: center; }
     .match-id { font-size: 0.8rem; color: #00ff88; text-align: center; margin-bottom: 15px; }
     
@@ -40,7 +40,11 @@
     .team-col { background: #1e1e1e; padding: 15px; border-radius: 8px; border-top: 4px solid #444;}
     .team-col.home { border-top-color: #ff2a5f; }
     .team-col.away { border-top-color: #00e5ff; }
-    .team-col h3 { margin-top: 0; text-align: center; color: #fff; font-size: 1.2rem; }
+    .team-col h3 { margin-top: 0; text-align: center; color: #fff; font-size: 1.2rem; margin-bottom: 15px;}
+    
+    /* Player Input Rows */
+    .player-row { display:flex; gap:5px; margin-bottom:5px; align-items:center; background:#252525; padding:5px; border-radius:5px; border-left: 2px solid #555;}
+    .player-row input[type="text"], .player-row select { padding: 6px; font-size: 0.8rem; }
     
     @media (max-width: 600px) {
       .flex-row { flex-direction: column; gap: 10px; }
@@ -70,8 +74,6 @@
           </div>
           <label style="margin-top:10px">Custom Logo:</label>
           <input type="file" id="homeLogo" accept="image/*" />
-          <label style="margin-top:10px">Coach:</label>
-          <input type="text" id="homeCoach" value="Ole Gunnar Solskjaer" />
         </div>
         
         <div class="form-group">
@@ -83,8 +85,6 @@
           </div>
           <label style="margin-top:10px">Custom Logo:</label>
           <input type="file" id="awayLogo" accept="image/*" />
-          <label style="margin-top:10px">Coach:</label>
-          <input type="text" id="awayCoach" value="Pep Guardiola" />
         </div>
       </div>
 
@@ -109,11 +109,15 @@
 
     <!-- TAB 2: LINEUPS -->
     <div id="tab-lineups" class="tab-content">
-      
       <div class="flex-row">
+        
         <!-- HOME COLUMN -->
         <div class="team-col home">
           <h3>HOME TEAM</h3>
+          <div class="form-group">
+            <label>Coach Name</label>
+            <input type="text" id="homeCoach" value="Ole Gunnar Solskjaer" />
+          </div>
           <div class="form-group">
             <label>Formation</label>
             <select id="homeFormation">
@@ -125,35 +129,26 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Starting XI (Number Name)</label>
-            <textarea id="homeLineupText">1 De Gea
-29 Wan-Bissaka
-2 Lindelof
-5 Maguire
-23 Shaw
-39 McTominay
-17 Fred
-18 Fernandes
-11 Greenwood
-9 Martial
-10 Rashford</textarea>
+            <label>Starting XI (Required for Cinematic)</label>
+            <div id="homePlayersContainer"></div>
           </div>
           <div class="form-group">
             <label>Substitutes (Number Name)</label>
             <textarea id="homeSubsText" class="subs">26 Henderson
 3 Bailly
 27 Telles
-31 Matic
-34 Van de Beek
-21 James
-7 Cavani</textarea>
+31 Matic</textarea>
           </div>
-          <button class="btn btn-blue" onclick="showLineup('home')">SHOW HOME LINEUP</button>
+          <button class="btn btn-blue" onclick="showLineup('home')" id="homeLineupBtn">SHOW HOME LINEUP</button>
         </div>
         
         <!-- AWAY COLUMN -->
         <div class="team-col away">
           <h3>AWAY TEAM</h3>
+          <div class="form-group">
+            <label>Coach Name</label>
+            <input type="text" id="awayCoach" value="Pep Guardiola" />
+          </div>
           <div class="form-group">
             <label>Formation</label>
             <select id="awayFormation">
@@ -165,33 +160,20 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Starting XI (Number Name)</label>
-            <textarea id="awayLineupText">31 Ederson
-2 Walker
-5 Stones
-3 Dias
-27 Cancelo
-16 Rodri
-8 Gundogan
-17 De Bruyne
-26 Mahrez
-9 Jesus
-7 Sterling</textarea>
+            <label>Starting XI (Required for Cinematic)</label>
+            <div id="awayPlayersContainer"></div>
           </div>
           <div class="form-group">
             <label>Substitutes (Number Name)</label>
             <textarea id="awaySubsText" class="subs">13 Steffen
 14 Laporte
 22 Mendy
-25 Fernandinho
-20 Silva
-47 Foden
-10 Aguero</textarea>
+25 Fernandinho</textarea>
           </div>
-          <button class="btn btn-blue" onclick="showLineup('away')">SHOW AWAY LINEUP</button>
+          <button class="btn btn-blue" onclick="showLineup('away')" id="awayLineupBtn">SHOW AWAY LINEUP</button>
         </div>
+        
       </div>
-      
     </div>
 
     <!-- GLOBAL ACTIONS -->
@@ -213,11 +195,80 @@
       document.getElementById('tab-' + tabId).classList.add('active');
     }
 
+    // Dynamic Player Inputs Generation
+    const positions = ['GK','CB','LB','RB','CDM','CM','CAM','LW','RW','ST'];
+    function generatePlayerRows(teamPrefix, defaults) {
+      let html = '';
+      for(let i=0; i<11; i++) {
+        const d = defaults[i] || { num: '', name: '', pos: 'CM' };
+        html += `
+          <div class="player-row">
+            <span style="font-weight:bold; width:20px; font-size:0.8rem; color:#888;">${i+1}</span>
+            <input type="text" id="${teamPrefix}Num_${i}" placeholder="#" style="width:35px;" value="${d.num}" />
+            <input type="text" id="${teamPrefix}Name_${i}" placeholder="Name" style="flex:1;" value="${d.name}" />
+            <select id="${teamPrefix}Pos_${i}" style="width:65px;">
+              ${positions.map(p => `<option value="${p}" ${p === d.pos ? 'selected' : ''}>${p}</option>`).join('')}
+            </select>
+            <input type="file" id="${teamPrefix}Photo_${i}" accept="image/*" style="width:80px; font-size:0.6rem; margin:0;" />
+          </div>
+        `;
+      }
+      document.getElementById(`${teamPrefix}PlayersContainer`).innerHTML = html;
+    }
+
+    // Pre-fill some defaults so it's not tedious to test
+    const homeDefaults = [
+      {num:'1', name:'De Gea', pos:'GK'}, {num:'29', name:'Wan-Bissaka', pos:'RB'},
+      {num:'2', name:'Lindelof', pos:'CB'}, {num:'5', name:'Maguire', pos:'CB'},
+      {num:'23', name:'Shaw', pos:'LB'}, {num:'39', name:'McTominay', pos:'CDM'},
+      {num:'17', name:'Fred', pos:'CM'}, {num:'18', name:'Fernandes', pos:'CAM'},
+      {num:'11', name:'Greenwood', pos:'RW'}, {num:'9', name:'Martial', pos:'ST'},
+      {num:'10', name:'Rashford', pos:'LW'}
+    ];
+    const awayDefaults = [
+      {num:'31', name:'Ederson', pos:'GK'}, {num:'2', name:'Walker', pos:'RB'},
+      {num:'5', name:'Stones', pos:'CB'}, {num:'3', name:'Dias', pos:'CB'},
+      {num:'27', name:'Cancelo', pos:'LB'}, {num:'16', name:'Rodri', pos:'CDM'},
+      {num:'8', name:'Gundogan', pos:'CM'}, {num:'17', name:'De Bruyne', pos:'CAM'},
+      {num:'26', name:'Mahrez', pos:'RW'}, {num:'9', name:'Jesus', pos:'ST'},
+      {num:'7', name:'Sterling', pos:'LW'}
+    ];
+
+    generatePlayerRows('home', homeDefaults);
+    generatePlayerRows('away', awayDefaults);
+
+
+    // Image Handling
     function getBase64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    // Compress image via Canvas to prevent crashing node server with 11 massive photos
+    function compressImage(file, maxWidth=250, maxHeight=250) {
+      return new Promise((resolve, reject) => {
+        if (!file) return resolve(null);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+            if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.8)); 
+          };
+        };
         reader.onerror = error => reject(error);
       });
     }
@@ -250,59 +301,73 @@
       };
 
       const homeLogoFile = document.getElementById('homeLogo').files[0];
-      if (homeLogoFile) {
-        payload.homeLogoData = await getBase64(homeLogoFile);
-      }
+      if (homeLogoFile) payload.homeLogoData = await getBase64(homeLogoFile);
+      
       const awayLogoFile = document.getElementById('awayLogo').files[0];
-      if (awayLogoFile) {
-        payload.awayLogoData = await getBase64(awayLogoFile);
-      }
-      sendActionToServer(payload);
+      if (awayLogoFile) payload.awayLogoData = await getBase64(awayLogoFile);
+      
+      await sendActionToServer(payload);
     }
 
-    function parseLineupText(text) {
+    // Parse simple multiline text (used for Subs now)
+    function parseSubsText(text) {
       const lines = text.split('\n').map(l => l.trim()).filter(l => l);
       return lines.map(line => {
         const firstSpace = line.indexOf(' ');
         if (firstSpace > -1) {
-          const number = line.substring(0, firstSpace).trim();
-          const name = line.substring(firstSpace + 1).trim();
-          return { number, name };
-        } else {
-          return { number: '-', name: line };
+          return { number: line.substring(0, firstSpace).trim(), name: line.substring(firstSpace + 1).trim() };
         }
+        return { number: '-', name: line };
       });
     }
 
-    function showLineup(team) {
-      const lineupText = document.getElementById(team + 'LineupText').value;
-      const subsText = document.getElementById(team + 'SubsText').value;
-      
-      const players = parseLineupText(lineupText);
-      const subs = parseLineupText(subsText);
-      const formation = document.getElementById(team + 'Formation').value;
-      
-      // Also send the team colors/names so the lineup knows what colors to use
-      sendUpdate().then(() => {
-        sendActionToServer({ 
+    async function showLineup(team) {
+      const btn = document.getElementById(team + 'LineupBtn');
+      const originalText = btn.innerText;
+      btn.innerText = 'PROCESSING PHOTOS...';
+      btn.disabled = true;
+
+      try {
+        // Collect 11 players
+        const players = [];
+        for(let i=0; i<11; i++) {
+          const num = document.getElementById(`${team}Num_${i}`).value || '-';
+          const name = document.getElementById(`${team}Name_${i}`).value || 'Player';
+          const pos = document.getElementById(`${team}Pos_${i}`).value || 'CM';
+          const fileInput = document.getElementById(`${team}Photo_${i}`);
+          
+          let photoData = null;
+          if (fileInput.files && fileInput.files[0]) {
+            photoData = await compressImage(fileInput.files[0]);
+          }
+          players.push({ number: num, name: name, position: pos, photo: photoData });
+        }
+
+        const subsText = document.getElementById(team + 'SubsText').value;
+        const subs = parseSubsText(subsText);
+        const formation = document.getElementById(team + 'Formation').value;
+        
+        await sendUpdate(); // Sync coach names/colors first
+        
+        await sendActionToServer({ 
           type: 'SHOW_LINEUP', 
           team: team, 
           formation: formation,
           players: players,
           subs: subs
         });
-      });
+      } catch (err) {
+        console.error("Error sending lineup:", err);
+        alert("Failed to send lineup. Ensure images are not corrupted.");
+      }
+
+      btn.innerText = originalText;
+      btn.disabled = false;
     }
 
-    function animateIn() {
-      sendActionToServer({ type: 'ANIMATE_IN' });
-    }
+    function animateIn() { sendActionToServer({ type: 'ANIMATE_IN' }); }
+    function animateOut() { sendActionToServer({ type: 'ANIMATE_OUT' }); }
 
-    function animateOut() {
-      sendActionToServer({ type: 'ANIMATE_OUT' });
-    }
-
-    // Initialize with text update
     window.onload = () => sendUpdate();
   </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Football Broadcast Graphic - Transparent 2D Dashboard</title>
+  <title>Football Broadcast Graphic - Cinematic</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
@@ -13,12 +13,9 @@
       --away-color: #00e5ff;
       --font-titles: 'Bebas Neue', sans-serif;
       --font-info: 'Rajdhani', sans-serif;
-      --accent-yellow: #fffcd1;
-      --bg-glass: rgba(18, 32, 43, 0.95);
-      --border-dark: #2a4050;
-      --bg-darker: #0a151f;
-      --pitch-green: #1a422a;
-      --pitch-border: #2a6843;
+      
+      /* Dynamic Team Variables (Set via JS) */
+      --lineup-primary: #ff2a5f;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,8 +25,7 @@
       background-color: transparent; 
       color: #ffffff;
       overflow: hidden; 
-      width: 100vw;
-      height: 100vh;
+      width: 100vw; height: 100vh;
     }
 
     .broadcast-container {
@@ -39,13 +35,12 @@
     }
 
     /* =========================================
-       SCENE 1: VS GRAPHIC (Existing)
+       SCENE 1: VS GRAPHIC
        ========================================= */
     .scene-3d {
       position: absolute; width: 100%; height: 100%;
       display: flex; justify-content: center; align-items: center;
-      transform-style: preserve-3d;
-      opacity: 0; pointer-events: none;
+      transform-style: preserve-3d; opacity: 0; pointer-events: none;
     }
     .scene-3d.active { opacity: 1; pointer-events: auto; }
     
@@ -58,97 +53,52 @@
     .scene-3d.exit .camera-rig { animation: cameraDollyOut 1.2s cubic-bezier(0.5, 0, 0.2, 1) forwards; }
 
     .gfx-wrapper {
-      position: relative;
-      transform: scale(0.9) translateY(-50px); 
-      width: 1400px; height: 800px;
-      display: flex; justify-content: center; align-items: center;
+      position: relative; transform: scale(0.9) translateY(-50px); 
+      width: 1400px; height: 800px; display: flex; justify-content: center; align-items: center;
       transform-style: preserve-3d;
     }
-
-    .floor-shadow {
-      position: absolute; bottom: -150px;
-      width: 1800px; height: 400px;
-      background: radial-gradient(ellipse at center, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, transparent 70%);
-      transform: rotateX(85deg) translateZ(-150px);
-      filter: blur(25px); opacity: 0;
-      transition: opacity 2s ease-in-out;
-    }
-    .scene-3d.active .floor-shadow { opacity: 1; transition-delay: 1s; }
-    .scene-3d.exit .floor-shadow { opacity: 0; transition-delay: 0s; transition-duration: 0.5s; }
 
     .team-panel {
       position: absolute; width: 420px; height: 600px;
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      border-radius: 20px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
       transform-style: preserve-3d; opacity: 0;
     }
-    .team-panel::after {
-      content: ''; position: absolute; inset: 0; border-radius: 20px; z-index: -2;
-      transform: translateZ(-20px); background: #050508;
-    }
-    .team-panel::before {
-      content: ''; position: absolute; inset: -4px; border-radius: 24px; z-index: -1; transform: translateZ(-10px);
-    }
-    .home-panel {
-      background: linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(5,5,10,0.95) 100%);
-      transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); 
-    }
-    .home-panel::before { background: linear-gradient(135deg, var(--home-color), rgba(255,255,255,0.2), transparent); box-shadow: 0 0 40px var(--home-color); }
+    .team-panel::after { content: ''; position: absolute; inset: 0; border-radius: 20px; z-index: -2; transform: translateZ(-20px); background: #050508; }
+    
+    .home-panel { background: linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(5,5,10,0.95) 100%); transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); }
+    .home-panel::before { content: ''; position: absolute; inset: -4px; border-radius: 24px; z-index: -1; transform: translateZ(-10px); background: linear-gradient(135deg, var(--home-color), rgba(255,255,255,0.2), transparent); box-shadow: 0 0 40px var(--home-color); }
     .scene-3d.active .home-panel { animation: cinematicFlyInLeft 2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     .scene-3d.exit .home-panel { animation: cinematicFlyOutLeft 1.2s cubic-bezier(0.8, 0, 0.2, 1) forwards 0.2s; }
 
-    .away-panel {
-      background: linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(5,5,10,0.95) 100%);
-      transform: translateX(1000px) translateZ(1000px) rotateY(-90deg);
-    }
-    .away-panel::before { background: linear-gradient(135deg, var(--away-color), rgba(255,255,255,0.2), transparent); box-shadow: 0 0 40px var(--away-color); }
+    .away-panel { background: linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(5,5,10,0.95) 100%); transform: translateX(1000px) translateZ(1000px) rotateY(-90deg); }
+    .away-panel::before { content: ''; position: absolute; inset: -4px; border-radius: 24px; z-index: -1; transform: translateZ(-10px); background: linear-gradient(135deg, var(--away-color), rgba(255,255,255,0.2), transparent); box-shadow: 0 0 40px var(--away-color); }
     .scene-3d.active .away-panel { animation: cinematicFlyInRight 2s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s; }
     .scene-3d.exit .away-panel { animation: cinematicFlyOutRight 1.2s cubic-bezier(0.8, 0, 0.2, 1) forwards 0.1s; }
 
-    .team-logo-container {
-      width: 360px; height: 360px; display: flex; justify-content: center; align-items: center;
-      transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0;
-    }
+    .team-logo-container { width: 360px; height: 360px; display: flex; justify-content: center; align-items: center; transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0; }
     .scene-3d.active .team-logo-container { animation: logoSpinIn 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards 1s; }
     .scene-3d.exit .team-logo-container { animation: logoSpinOut 1s cubic-bezier(0.8, 0, 0.2, 1) forwards 0s; }
-    .team-logo { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 50%; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.2); }
+    .team-logo { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 50%; box-shadow: 0 20px 50px rgba(0,0,0,0.9); }
 
-    .team-name {
-      font-family: var(--font-titles); font-size: 5rem; letter-spacing: 2px;
-      margin-top: 20px; text-align: center;
-      transform: translateZ(80px) translateY(100px) rotateX(-90deg); opacity: 0; color: #fff; transform-origin: bottom;
-    }
+    .team-name { font-family: var(--font-titles); font-size: 5rem; letter-spacing: 2px; margin-top: 20px; text-align: center; transform: translateZ(80px) translateY(100px) rotateX(-90deg); opacity: 0; color: #fff; transform-origin: bottom; }
     .scene-3d.active .team-name { animation: textFlipUp 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards 1.8s; }
     .scene-3d.exit .team-name { animation: textFlipDown 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards 0s; }
-    .home-panel .team-name { text-shadow: 0 1px 0 #999, 0 2px 0 #888, 0 3px 0 #777, 0 4px 0 #666, 0 5px 0 #555, 0 20px 20px rgba(0,0,0,0.9), 0 0 30px var(--home-color); }
-    .away-panel .team-name { text-shadow: 0 1px 0 #999, 0 2px 0 #888, 0 3px 0 #777, 0 4px 0 #666, 0 5px 0 #555, 0 20px 20px rgba(0,0,0,0.9), 0 0 30px var(--away-color); }
+    .home-panel .team-name { text-shadow: 0 20px 20px rgba(0,0,0,0.9), 0 0 30px var(--home-color); }
+    .away-panel .team-name { text-shadow: 0 20px 20px rgba(0,0,0,0.9), 0 0 30px var(--away-color); }
 
-    .center-panel {
-      position: absolute; width: 450px; display: flex; flex-direction: column; align-items: center;
-      transform: translateY(-400px) scale(0.5); opacity: 0; transform-style: preserve-3d;
-    }
+    .center-panel { position: absolute; width: 450px; display: flex; flex-direction: column; align-items: center; transform: translateY(-400px) scale(0.5); opacity: 0; transform-style: preserve-3d; }
     .scene-3d.active .center-panel { animation: centerDropIn 2s cubic-bezier(0.22, 1, 0.36, 1) forwards 1.2s; }
     .scene-3d.exit .center-panel { animation: centerDropOut 1.2s cubic-bezier(0.5, 0, 0.2, 1) forwards 0.2s; }
 
-    .match-info-glass {
-      background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(5, 5, 10, 1) 100%);
-      border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid #fff;
-      padding: 15px 40px; border-radius: 10px; text-align: center;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.9); width: 100%; margin-bottom: 20px; transform-style: preserve-3d;
-    }
+    .match-info-glass { background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(5, 5, 10, 1) 100%); border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid #fff; padding: 15px 40px; border-radius: 10px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.9); width: 100%; margin-bottom: 20px; transform-style: preserve-3d; }
     .league-name { font-size: 1.4rem; color: #aaa; letter-spacing: 5px; font-weight: 700; transform: translateZ(20px); }
     .match-day { font-family: var(--font-titles); font-size: 3rem; color: #fff; transform: translateZ(40px); letter-spacing: 2px; }
 
-    .vs-badge {
-      font-family: var(--font-titles); font-size: 8rem; line-height: 1; color: #fff;
-      text-shadow: 0 2px 0 #ccc, 0 4px 0 #aaa, 0 6px 0 #888, 0 8px 0 #666, 0 30px 30px rgba(0,0,0,0.9);
-      margin: 10px 0; position: relative; transform: translateZ(0px) scale(4); opacity: 0;
-    }
+    .vs-badge { font-family: var(--font-titles); font-size: 8rem; line-height: 1; color: #fff; text-shadow: 0 30px 30px rgba(0,0,0,0.9); margin: 10px 0; position: relative; transform: translateZ(0px) scale(4); opacity: 0; }
     .scene-3d.active .vs-badge { animation: vsSlamIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards 2s; }
     .scene-3d.exit .vs-badge { animation: vsSlamOut 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards 0s; }
 
-    /* VS ANIMATIONS */
     @keyframes cameraDolly { 0% { transform: translateZ(600px); } 100% { transform: translateZ(0px); } }
     @keyframes cinematicFlyInLeft { 0% { transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); opacity: 0; } 100% { transform: translateX(-500px) translateZ(50px) rotateY(15deg) rotateX(2deg); opacity: 1; } }
     @keyframes cinematicFlyInRight { 0% { transform: translateX(1000px) translateZ(1000px) rotateY(-90deg); opacity: 0; } 100% { transform: translateX(500px) translateZ(50px) rotateY(-15deg) rotateX(2deg); opacity: 1; } }
@@ -166,120 +116,131 @@
 
 
     /* =========================================
-       SCENE 2: LINEUPS (FLAT 2D DASHBOARD)
+       SCENE 2: CINEMATIC LINEUPS
        ========================================= */
-    .lineup-scene-2d {
+    .lineup-scene-cinematic {
       position: absolute; width: 100%; height: 100%;
       display: flex; justify-content: center; align-items: center;
       opacity: 0; pointer-events: none; transition: opacity 0.5s;
     }
-    .lineup-scene-2d.active { opacity: 1; pointer-events: auto; }
+    .lineup-scene-cinematic.active { opacity: 1; pointer-events: auto; }
 
-    .lineup-container {
-      width: 1300px; height: 750px;
-      background: var(--bg-glass);
-      display: flex; flex-direction: column;
-      transform: translateY(50px); opacity: 0;
-      transition: all 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+    /* PHASE 1: PLAYER INTROS */
+    #playerIntrosContainer {
+      position: absolute; width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center; z-index: 50;
     }
-    .lineup-scene-2d.active .lineup-container { transform: translateY(0); opacity: 1; }
-
-    /* Header Bar */
-    .lineup-header-bar {
-      width: 100%; background: var(--bg-darker); color: var(--accent-yellow);
-      text-align: center; padding: 15px 0; border-bottom: 2px solid var(--border-dark);
-      font-size: 1.8rem; font-weight: bold; letter-spacing: 2px;
-    }
-
-    /* Body Flex Container */
-    .lineup-body {
-      display: flex; flex: 1; padding: 20px; gap: 20px;
-    }
-
-    /* Left Col: Logo & Coach */
-    .col-left { 
-      flex: 0 0 250px; display: flex; flex-direction: column; 
-      align-items: center; justify-content: center; gap: 40px; 
-    }
-    .logo-box { 
-      width: 200px; height: 200px; border: 1px solid var(--border-dark); 
-      border-radius: 10px; padding: 15px; background: rgba(0,0,0,0.4); 
-      display: flex; justify-content: center; align-items: center; 
-    }
-    .lineup-logo { max-width: 100%; max-height: 100%; object-fit: contain; }
     
-    .coach-box { text-align: center; }
-    .coach-label { font-size: 1.2rem; color: #8a9ba8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-    .coach-name { font-size: 2rem; color: var(--accent-yellow); font-family: var(--font-titles); letter-spacing: 1px; }
-
-    /* Center Col: Flat Pitch */
-    .col-center { 
-      flex: 1; background: var(--pitch-green); 
-      position: relative; border: 1px solid var(--pitch-border); 
+    .player-intro-card {
+      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.5);
+      width: 450px; height: 550px;
+      background: linear-gradient(135deg, var(--lineup-primary) 0%, rgba(10,15,25,0.98) 100%);
+      border-radius: 20px; border: 4px solid rgba(255,255,255,0.3);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 50px 100px rgba(0,0,0,0.9), inset 0 0 50px var(--lineup-primary);
+      opacity: 0; pointer-events: none;
     }
-    .pitch-2d { width: 100%; height: 100%; position: relative; }
+    .player-intro-card.run-anim {
+      animation: introSequence 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes introSequence {
+      0% { transform: translate(-50%, -50%) scale(0.3) rotateY(90deg); opacity: 0; }
+      20% { transform: translate(-50%, -50%) scale(1.1) rotateY(0deg); opacity: 1; }
+      80% { transform: translate(-50%, -50%) scale(1) rotateY(0deg); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.5) rotateY(-90deg); opacity: 0; }
+    }
+
+    .intro-photo { width: 220px; height: 220px; object-fit: cover; border-radius: 50%; border: 6px solid #fff; margin-bottom: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); background: rgba(0,0,0,0.5); }
+    .intro-number { font-family: var(--font-titles); font-size: 6rem; color: #fff; line-height: 0.9; text-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+    .intro-name { font-size: 2.5rem; color: #fff; font-weight: bold; text-transform: uppercase; margin: 10px 0; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .intro-pos { background: #fff; color: var(--lineup-primary); padding: 5px 25px; border-radius: 20px; font-weight: bold; font-size: 1.4rem; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+
+
+    /* PHASE 2: FULL PITCH (Fades in after intros) */
+    .pitch-phase {
+      position: absolute; width: 1400px; height: 800px;
+      display: flex; opacity: 0; transition: opacity 1s ease;
+      background: rgba(10, 15, 25, 0.85); border-radius: 20px;
+      border: 2px solid rgba(255,255,255,0.1);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      overflow: hidden;
+    }
+    .pitch-phase.active { opacity: 1; }
+
+    /* Left Col: Info */
+    .col-left { 
+      flex: 0 0 300px; padding: 40px; display: flex; flex-direction: column; 
+      align-items: center; justify-content: center; gap: 40px; 
+      background: linear-gradient(to right, rgba(0,0,0,0.6), transparent);
+    }
+    .logo-box { width: 200px; height: 200px; display: flex; justify-content: center; align-items: center; }
+    .lineup-logo { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); }
+    .coach-box { text-align: center; }
+    .coach-label { font-size: 1.2rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; }
+    .coach-name { font-size: 2.2rem; color: #fff; font-family: var(--font-titles); letter-spacing: 1px; margin-top: 5px;}
+
+    /* Center Col: 3D Pitch */
+    .col-center { 
+      flex: 1; position: relative; display: flex; justify-content: center; align-items: center;
+      perspective: 1200px; overflow: visible;
+    }
+    .pitch-3d { 
+      width: 600px; height: 750px; background: #1a422a; 
+      border: 4px solid var(--lineup-primary); 
+      transform: rotateX(45deg) translateZ(-50px) scale(0.9);
+      box-shadow: 0 50px 100px rgba(0,0,0,0.9), inset 0 0 80px rgba(0,0,0,0.6);
+      position: relative; transform-style: preserve-3d;
+    }
     
     /* Pitch Markings */
-    .pitch-lines { position: absolute; inset: 20px; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; }
-    .pitch-lines::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.3); }
-    .pitch-lines::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 140px; height: 140px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; }
-    .penalty-box-top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 280px; height: 110px; border: 2px solid rgba(255,255,255,0.3); border-top: none; }
-    .penalty-box-bottom { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 280px; height: 110px; border: 2px solid rgba(255,255,255,0.3); border-bottom: none; }
+    .pitch-lines { position: absolute; inset: 20px; border: 2px solid rgba(255,255,255,0.4); pointer-events: none; }
+    .pitch-lines::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.4); }
+    .pitch-lines::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; }
+    .penalty-box-top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 250px; height: 100px; border: 2px solid rgba(255,255,255,0.4); border-top: none; }
+    .penalty-box-bottom { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 250px; height: 100px; border: 2px solid rgba(255,255,255,0.4); border-bottom: none; }
 
-    /* Player Nodes on 2D Pitch */
-    .player-node-2d {
-      position: absolute; width: 120px; margin-left: -60px; margin-top: -30px;
+    /* Player Nodes on Pitch */
+    .pitch-player {
+      position: absolute; width: 80px; height: 100px;
+      margin-left: -40px; margin-top: -60px;
       display: flex; flex-direction: column; align-items: center;
-      opacity: 0; transform: scale(0.5);
+      transform: rotateX(-45deg); /* Counter pitch rotation so they stand up */
+      opacity: 0; transform-origin: bottom center;
     }
-    .lineup-scene-2d.active .player-node-2d {
-      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards;
+    .pitch-player.active {
+      animation: dropToPitch 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards;
     }
-    @keyframes popIn { 100% { opacity: 1; transform: scale(1); } }
+    @keyframes dropToPitch {
+      0% { transform: rotateX(-45deg) translateY(-300px) scale(2); opacity: 0; }
+      100% { transform: rotateX(-45deg) translateY(0) scale(1); opacity: 1; }
+    }
+    
+    .pitch-photo { width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #fff; background: rgba(0,0,0,0.5); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
+    .pitch-name { color: #fff; font-size: 1rem; font-weight: bold; text-shadow: 1px 1px 3px #000, 0 0 10px #000; margin-top: 5px; white-space: nowrap; text-transform: uppercase; }
+    .pitch-pos { font-size: 0.8rem; background: var(--lineup-primary); color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-top: -10px; z-index: 2;}
+    .pitch-num { position: absolute; top: -5px; right: -5px; background: #fff; color: #000; font-family: var(--font-titles); width: 25px; height: 25px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 3;}
 
-    .player-number-2d {
-      width: 45px; height: 45px; background: var(--accent-yellow); color: #12202b;
-      border-radius: 50%; font-family: var(--font-titles); font-size: 1.8rem;
-      display: flex; justify-content: center; align-items: center; margin-bottom: 5px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    }
-    .player-name-2d {
-      color: var(--accent-yellow); font-size: 1rem; font-weight: bold; 
-      text-transform: uppercase; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-    }
 
     /* Right Col: Subs */
     .col-right { 
-      flex: 0 0 350px; padding-left: 20px; 
+      flex: 0 0 350px; padding: 40px 40px 40px 0; 
       display: flex; flex-direction: column; 
+      background: linear-gradient(to left, rgba(0,0,0,0.6), transparent);
     }
-    .subs-header { 
-      font-size: 1.5rem; color: var(--accent-yellow); 
-      font-weight: bold; margin-bottom: 20px; letter-spacing: 1px; 
-    }
-    
-    .subs-container { display: flex; flex-direction: column; gap: 8px; }
+    .subs-header { font-size: 1.5rem; color: #fff; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase;}
+    .subs-container { display: flex; flex-direction: column; gap: 10px; }
     
     .sub-item { 
-      display: flex; align-items: center; background: var(--bg-darker); 
-      border: 1px solid var(--border-dark); border-radius: 4px; overflow: hidden;
+      display: flex; align-items: center; background: rgba(20, 25, 35, 0.8); 
+      border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden;
       opacity: 0; transform: translateX(50px);
     }
-    .lineup-scene-2d.active .sub-item {
-      animation: slideInRight 0.5s ease forwards;
-    }
+    .pitch-phase.active .sub-item { animation: slideInRight 0.5s ease forwards; }
     @keyframes slideInRight { 100% { opacity: 1; transform: translateX(0); } }
 
-    .sub-number { 
-      background: #050a0f; color: var(--accent-yellow); 
-      font-size: 1.8rem; font-family: var(--font-titles); 
-      width: 50px; padding: 10px 0; text-align: center; 
-      border-right: 1px solid var(--border-dark); 
-    }
-    .sub-name { 
-      color: #fff; padding-left: 15px; font-weight: bold; 
-      font-size: 1.1rem; text-transform: uppercase; 
-    }
+    .sub-number { background: var(--lineup-primary); color: #fff; font-size: 1.8rem; font-family: var(--font-titles); width: 50px; padding: 10px 0; text-align: center; }
+    .sub-name { color: #fff; padding-left: 15px; font-weight: bold; font-size: 1.2rem; text-transform: uppercase; }
 
   </style>
 </head>
@@ -292,14 +253,10 @@
     <div class="scene-3d" id="scene3d">
       <div class="camera-rig">
         <div class="gfx-wrapper">
-          
           <div class="team-panel home-panel">
-            <div class="team-logo-container">
-              <img src="home_logo.jpg" alt="Home Logo" id="homeLogoImg" class="team-logo" />
-            </div>
+            <div class="team-logo-container"><img src="home_logo.jpg" id="homeLogoImg" class="team-logo" /></div>
             <div class="team-name" id="homeNameText">RED DEVILS</div>
           </div>
-
           <div class="center-panel">
             <div class="match-info-glass">
               <div class="league-name" id="leagueNameText">PREMIER CHAMPIONSHIP</div>
@@ -311,63 +268,51 @@
               <div class="match-day" style="font-size: 2rem" id="kickoffTimeText">20:45 CET</div>
             </div>
           </div>
-
           <div class="team-panel away-panel">
-            <div class="team-logo-container">
-              <img src="away_logo.jpg" alt="Away Logo" id="awayLogoImg" class="team-logo" />
-            </div>
+            <div class="team-logo-container"><img src="away_logo.jpg" id="awayLogoImg" class="team-logo" /></div>
             <div class="team-name" id="awayNameText">BLUE EAGLES</div>
           </div>
-          
-          <div class="floor-shadow"></div>
-          
         </div>
       </div>
     </div>
 
     <!-- =========================================
-         SCENE 2: LINEUPS (FLAT 2D DASHBOARD)
+         SCENE 2: CINEMATIC LINEUPS
          ========================================= -->
-    <div class="lineup-scene-2d" id="lineupScene">
-      <div class="lineup-container">
-        
-        <div class="lineup-header-bar" id="lineupLeagueText">FOOTBALL CHAMPIONSHIP 2024</div>
-        
-        <div class="lineup-body">
-          <!-- Left Column: Logo & Coach -->
-          <div class="col-left">
-            <div class="logo-box">
-              <img src="home_logo.jpg" id="lineupLogoImg" class="lineup-logo">
-            </div>
-            <div class="coach-box">
-              <div class="coach-label">COACH</div>
-              <div class="coach-name" id="lineupCoachText">MANAV ROY</div>
-            </div>
-          </div>
-          
-          <!-- Center Column: Pitch -->
-          <div class="col-center">
-            <div class="pitch-2d">
-              <div class="pitch-lines">
-                <div class="penalty-box-top"></div>
-                <div class="penalty-box-bottom"></div>
-              </div>
-              <div id="playerNodesContainer">
-                <!-- Dynamically populated -->
-              </div>
-            </div>
-          </div>
-          
-          <!-- Right Column: Substitutes -->
-          <div class="col-right">
-            <div class="subs-header">SUBSTITUTE</div>
-            <div class="subs-container" id="subsContainer">
-              <!-- Dynamically populated -->
-            </div>
+    <div class="lineup-scene-cinematic" id="lineupScene">
+      
+      <!-- Phase 1: Rapid Fire Player Intros -->
+      <div id="playerIntrosContainer"></div>
+      
+      <!-- Phase 2: Full Pitch Overview -->
+      <div class="pitch-phase" id="pitchPhase">
+        <!-- Left Info -->
+        <div class="col-left">
+          <div class="logo-box"><img src="" id="lineupLogoImg" class="lineup-logo"></div>
+          <div class="coach-box">
+            <div class="coach-label">COACH</div>
+            <div class="coach-name" id="lineupCoachText">MANAV ROY</div>
           </div>
         </div>
         
+        <!-- Center Pitch -->
+        <div class="col-center">
+          <div class="pitch-3d">
+            <div class="pitch-lines">
+              <div class="penalty-box-top"></div>
+              <div class="penalty-box-bottom"></div>
+            </div>
+            <div id="playerNodesContainer"></div>
+          </div>
+        </div>
+        
+        <!-- Right Subs -->
+        <div class="col-right">
+          <div class="subs-header">SUBSTITUTES</div>
+          <div class="subs-container" id="subsContainer"></div>
+        </div>
       </div>
+
     </div>
 
   </div>
@@ -392,13 +337,10 @@
         if(data.leagueName) { document.getElementById('leagueNameText').innerText = data.leagueName; appState.leagueName = data.leagueName; }
         if(data.matchday) document.getElementById('matchdayText').innerText = data.matchday;
         if(data.kickoffTime) document.getElementById('kickoffTimeText').innerText = data.kickoffTime;
-        
         if(data.homeCoach) appState.homeCoach = data.homeCoach;
         if(data.awayCoach) appState.awayCoach = data.awayCoach;
-        
         if(data.homeColor) { document.documentElement.style.setProperty('--home-color', data.homeColor); appState.homeColor = data.homeColor; }
         if(data.awayColor) { document.documentElement.style.setProperty('--away-color', data.awayColor); appState.awayColor = data.awayColor; }
-
         if(data.homeLogoData) { document.getElementById('homeLogoImg').src = data.homeLogoData; appState.homeLogo = data.homeLogoData; }
         if(data.awayLogoData) { document.getElementById('awayLogoImg').src = data.awayLogoData; appState.awayLogo = data.awayLogoData; }
       }
@@ -411,12 +353,13 @@
       if (data.type === 'ANIMATE_OUT') {
         hideScene('scene3d');
         hideScene('lineupScene');
+        document.getElementById('pitchPhase').classList.remove('active');
+        document.getElementById('playerIntrosContainer').innerHTML = '';
       }
 
       if (data.type === 'SHOW_LINEUP') {
         hideScene('scene3d'); // Hide VS
-        renderLineup(data.team, data.formation, data.players, data.subs);
-        showScene('lineupScene');
+        playCinematicLineup(data.team, data.formation, data.players, data.subs);
       }
     };
 
@@ -432,21 +375,89 @@
       scene.classList.remove('active');
     }
 
-    function renderLineup(team, formation, players, subs) {
-      // Setup Text, Logos, and Coach based on team
-      document.getElementById('lineupLeagueText').innerText = appState.leagueName;
+    async function playCinematicLineup(team, formation, players, subs) {
+      // Set Theme Colors
+      const primaryColor = team === 'home' ? appState.homeColor : appState.awayColor;
+      document.documentElement.style.setProperty('--lineup-primary', primaryColor);
       
-      if (team === 'home') {
-        document.getElementById('lineupLogoImg').src = appState.homeLogo;
-        document.getElementById('lineupCoachText').innerText = appState.homeCoach || 'NOT SET';
-      } else {
-        document.getElementById('lineupLogoImg').src = appState.awayLogo;
-        document.getElementById('lineupCoachText').innerText = appState.awayCoach || 'NOT SET';
-      }
-      
-      // Render Subs
+      document.getElementById('lineupLogoImg').src = team === 'home' ? appState.homeLogo : appState.awayLogo;
+      document.getElementById('lineupCoachText').innerText = team === 'home' ? (appState.homeCoach || 'NOT SET') : (appState.awayCoach || 'NOT SET');
+
+      // Reset DOM
+      const pitchPhase = document.getElementById('pitchPhase');
+      const introContainer = document.getElementById('playerIntrosContainer');
+      const pitchContainer = document.getElementById('playerNodesContainer');
       const subsContainer = document.getElementById('subsContainer');
+      
+      pitchPhase.classList.remove('active');
+      introContainer.innerHTML = '';
+      pitchContainer.innerHTML = '';
       subsContainer.innerHTML = '';
+      
+      showScene('lineupScene');
+
+      // 1. Generate Intro Cards (Rapid Fire)
+      // Display each for 0.8s, sequentially
+      const defaultAvatar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; // transparent pixel fallback if needed, but css handles background
+
+      players.forEach((p, idx) => {
+        const card = document.createElement('div');
+        card.className = 'player-intro-card';
+        card.style.animationDelay = `${idx * 0.8}s`;
+        
+        const photoSrc = p.photo || defaultAvatar;
+        
+        card.innerHTML = `
+          <img src="${photoSrc}" class="intro-photo" style="${!p.photo ? 'opacity:0;' : ''}">
+          <div class="intro-pos">${p.position}</div>
+          <div class="intro-name">${p.name}</div>
+          <div class="intro-number">${p.number}</div>
+        `;
+        introContainer.appendChild(card);
+        
+        // Trigger animation
+        setTimeout(() => card.classList.add('run-anim'), 10);
+      });
+
+      // Total Intro time = 11 players * 0.8s = 8.8s. Wait 9s before showing pitch.
+      const introDurationMs = players.length * 800 + 500;
+      
+      // Prep Pitch Nodes (Hidden initially)
+      const lines = formation.split('-').map(Number);
+      const rows = [1, ...lines]; // Row 0 = GK
+      const rowY = rows.length === 4 ? [92, 70, 45, 20] : rows.length === 5 ? [92, 72, 54, 36, 18] : [92, 60, 30]; 
+
+      let playerIndex = 0;
+      rows.forEach((numPlayersInRow, rIndex) => {
+        const yPos = rowY[rIndex];
+        for (let i = 0; i < numPlayersInRow; i++) {
+          if (playerIndex >= players.length) break;
+          const p = players[playerIndex];
+          const gap = 100 / (numPlayersInRow + 1);
+          const xPos = gap * (i + 1);
+
+          const node = document.createElement('div');
+          node.className = 'pitch-player';
+          node.style.left = `${xPos}%`;
+          node.style.top = `${yPos}%`;
+          // Stagger the drop animation
+          node.style.animationDelay = `${(playerIndex * 0.1)}s`;
+
+          const photoSrc = p.photo || defaultAvatar;
+
+          node.innerHTML = `
+            <div class="pitch-num">${p.number}</div>
+            <img src="${photoSrc}" class="pitch-photo" style="${!p.photo ? 'opacity:0;' : ''}">
+            <div class="pitch-pos">${p.position}</div>
+            <div class="pitch-name">${p.name}</div>
+          `;
+          
+          pitchContainer.appendChild(node);
+          playerIndex++;
+        }
+      });
+
+      // Prep Subs
       if (subs && subs.length > 0) {
         subs.forEach((s, idx) => {
           subsContainer.innerHTML += `
@@ -458,48 +469,16 @@
         });
       }
 
-      // Render Pitch Lineup
-      const container = document.getElementById('playerNodesContainer');
-      container.innerHTML = ''; // Clear old
-
-      // Parse formation (e.g. "4-3-3" -> [4, 3, 3])
-      const lines = formation.split('-').map(Number);
-      const rows = [1, ...lines]; // Row 0 is always GK
-      
-      // Pitch Y percentages: 0% is top (away), 100% is bottom (home end)
-      const rowY = rows.length === 4 ? [90, 70, 45, 20] : 
-                   rows.length === 5 ? [90, 72, 54, 36, 18] : [90, 60, 30]; 
-
-      let playerIndex = 0;
-      let delay = 0.4; 
-
-      rows.forEach((numPlayersInRow, rIndex) => {
-        const yPos = rowY[rIndex];
+      // 2. Trigger Phase 2 (Pitch Fade In & Fly In)
+      setTimeout(() => {
+        introContainer.innerHTML = ''; // clear intros
+        pitchPhase.classList.add('active'); // fade in pitch & subs
         
-        for (let i = 0; i < numPlayersInRow; i++) {
-          if (playerIndex >= players.length) break;
-
-          const p = players[playerIndex];
-          
-          const gap = 100 / (numPlayersInRow + 1);
-          const xPos = gap * (i + 1);
-
-          const node = document.createElement('div');
-          node.className = 'player-node-2d';
-          node.style.left = `${xPos}%`;
-          node.style.top = `${yPos}%`;
-          node.style.animationDelay = `${delay}s`;
-
-          node.innerHTML = `
-            <div class="player-number-2d">${p.number}</div>
-            <div class="player-name-2d">${p.name}</div>
-          `;
-          
-          container.appendChild(node);
-          playerIndex++;
-          delay += 0.1; 
-        }
-      });
+        // Trigger player drops
+        document.querySelectorAll('.pitch-player').forEach(node => {
+          node.classList.add('active');
+        });
+      }, introDurationMs);
     }
   </script>
 </body>
