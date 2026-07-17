@@ -70,6 +70,8 @@
           </div>
           <label style="margin-top:10px">Custom Logo:</label>
           <input type="file" id="homeLogo" accept="image/*" />
+          <label style="margin-top:10px">Coach:</label>
+          <input type="text" id="homeCoach" value="Ole Gunnar Solskjaer" />
         </div>
         
         <div class="form-group">
@@ -81,6 +83,8 @@
           </div>
           <label style="margin-top:10px">Custom Logo:</label>
           <input type="file" id="awayLogo" accept="image/*" />
+          <label style="margin-top:10px">Coach:</label>
+          <input type="text" id="awayCoach" value="Pep Guardiola" />
         </div>
       </div>
 
@@ -241,6 +245,8 @@
         kickoffTime: document.getElementById('kickoffTime').value,
         homeColor: document.getElementById('homeColor').value,
         awayColor: document.getElementById('awayColor').value,
+        homeCoach: document.getElementById('homeCoach').value,
+        awayCoach: document.getElementById('awayCoach').value,
       };
 
       const homeLogoFile = document.getElementById('homeLogo').files[0];
