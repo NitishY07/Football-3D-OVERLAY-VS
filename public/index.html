@@ -126,6 +126,28 @@
     .lineup-scene-cinematic.active { opacity: 1; pointer-events: auto; }
 
     /* PHASE 1: PLAYER INTROS */
+    #introPhaseContainer {
+      position: absolute; width: 100vw; height: 100vh;
+      display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 50;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.95) 100%);
+      opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
+    }
+    #introPhaseContainer.active { opacity: 1; }
+    
+    .intro-header {
+      position: absolute; top: 50px; left: 0; width: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      animation: dropDown 1s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+    }
+    .intro-header-logo { width: 140px; height: 140px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); margin-bottom: 10px;}
+    .intro-header-team { font-family: var(--font-titles); font-size: 5rem; color: #fff; line-height: 1; letter-spacing: 2px; text-shadow: 0 5px 15px rgba(0,0,0,0.8); text-transform: uppercase;}
+    .intro-header-title { font-size: 1.8rem; color: var(--lineup-primary); font-weight: bold; letter-spacing: 5px; text-transform: uppercase; text-shadow: 0 2px 5px #000;}
+    
+    @keyframes dropDown {
+      0% { transform: translateY(-100px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
     #playerIntrosContainer {
       position: absolute; width: 100%; height: 100%;
       display: flex; justify-content: center; align-items: center; z-index: 50;
@@ -279,7 +301,14 @@
     <div class="lineup-scene-cinematic" id="lineupScene">
       
       <!-- Phase 1: Rapid Fire Player Intros -->
-      <div id="playerIntrosContainer"></div>
+      <div id="introPhaseContainer">
+        <div class="intro-header">
+          <img src="" id="introPhaseLogo" class="intro-header-logo">
+          <div id="introPhaseTeam" class="intro-header-team">TEAM NAME</div>
+          <div class="intro-header-title">PLAYING XI</div>
+        </div>
+        <div id="playerIntrosContainer"></div>
+      </div>
       
       <!-- Phase 2: Full Pitch Overview -->
       <div class="pitch-phase" id="pitchPhase">
@@ -391,16 +420,21 @@
 
       // Reset DOM
       const pitchPhase = document.getElementById('pitchPhase');
+      const introPhase = document.getElementById('introPhaseContainer');
       const introContainer = document.getElementById('playerIntrosContainer');
       const pitchContainer = document.getElementById('playerNodesContainer');
       const subsContainer = document.getElementById('subsContainer');
       
       pitchPhase.classList.remove('active');
+      introPhase.classList.remove('active');
       introContainer.innerHTML = '';
       pitchContainer.innerHTML = '';
       subsContainer.innerHTML = '';
       
       showScene('lineupScene');
+      introPhase.classList.add('active');
+      document.getElementById('introPhaseLogo').src = team === 'home' ? appState.homeLogo : appState.awayLogo;
+      document.getElementById('introPhaseTeam').innerText = team === 'home' ? appState.homeName : appState.awayName;
 
       // 1. Generate Intro Cards (Grouped by formation rows, in reverse)
       const defaultAvatar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; // transparent pixel fallback if needed, but css handles background
@@ -498,7 +532,8 @@
 
       // 2. Trigger Phase 2 (Pitch Fade In & Fly In)
       setTimeout(() => {
-        introContainer.innerHTML = ''; // clear intros
+        introPhase.classList.remove('active'); // fade out intro bg
+        setTimeout(() => introContainer.innerHTML = '', 500); // clear intros after fade
         pitchPhase.classList.add('active'); // fade in pitch & subs
         
         // Trigger player drops
