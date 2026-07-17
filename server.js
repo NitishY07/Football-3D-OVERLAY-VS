@@ -75,12 +75,17 @@ const server = http.createServer((req, res) => {
 
   // 3. Static File Server
   let reqPath = req.url.split('?')[0];
-  let filePath = path.join(__dirname, 'public', reqPath === '/' ? 'index.html' : reqPath);
+  // Strip leading slashes to prevent Linux path.join from treating it as an absolute root path
+  let safePath = reqPath === '/' ? 'index.html' : reqPath.replace(/^\/+/, '');
+  let filePath = path.join(__dirname, 'public', safePath);
+  
+  console.log(`[HTTP GET] ${req.url} -> ${filePath}`);
   
   fs.readFile(filePath, (err, content) => {
     if (err) {
-      res.writeHead(404);
-      res.end('404 Not Found');
+      console.error(`[ERROR 404] File missing: ${filePath}`);
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end(`CUSTOM 404: Cannot find ${safePath} inside the public folder.`);
     } else {
       let extname = path.extname(filePath);
       let contentType = 'text/html';
@@ -88,7 +93,8 @@ const server = http.createServer((req, res) => {
         case '.js': contentType = 'text/javascript'; break;
         case '.css': contentType = 'text/css'; break;
         case '.png': contentType = 'image/png'; break;
-        case '.jpg': contentType = 'image/jpeg'; break;
+        case '.jpg': 
+        case '.jpeg': contentType = 'image/jpeg'; break;
       }
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(content, 'utf-8');
