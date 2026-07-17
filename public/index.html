@@ -221,10 +221,10 @@
 
     /* Pitch */
     .pitch-container {
-      position: absolute; top: 10vh; /* Moved up to show more pitch */
-      width: 1200px; height: 1400px; /* Make pitch bigger */
+      position: absolute; top: 10vh; 
+      width: 800px; height: 850px; /* Small enough to fit all 11 players on screen */
       transform-style: preserve-3d;
-      transform: rotateX(50deg) translateZ(-200px) translateY(100px);
+      transform: rotateX(15deg) translateZ(-50px);
       opacity: 0;
     }
     .lineup-scene-3d.active .pitch-container { animation: pitchRiseIn 1.5s cubic-bezier(0.2, 1, 0.3, 1) forwards 0.5s; }
@@ -235,7 +235,7 @@
       background: linear-gradient(0deg, #105928 0%, #157836 100%);
       border: 6px solid rgba(255,255,255,0.8);
       position: relative;
-      box-shadow: 0 100px 150px rgba(0,0,0,0.8), inset 0 0 100px rgba(0,0,0,0.5);
+      box-shadow: 0 50px 100px rgba(0,0,0,0.8), inset 0 0 50px rgba(0,0,0,0.5);
     }
     /* Pitch Stripes */
     .pitch-3d::before {
@@ -253,31 +253,31 @@
     }
     .pitch-lines::after { /* Center Circle */
       content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 200px; height: 200px; border: 4px solid rgba(255,255,255,0.6); border-radius: 50%;
+      width: 160px; height: 160px; border: 4px solid rgba(255,255,255,0.6); border-radius: 50%;
     }
     
     .penalty-box-bottom {
       position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 500px; height: 200px; border: 4px solid rgba(255,255,255,0.6); border-bottom: none;
+      width: 400px; height: 150px; border: 4px solid rgba(255,255,255,0.6); border-bottom: none;
     }
 
     /* Player Nodes */
     .player-node {
       position: absolute;
       transform-style: preserve-3d;
-      width: 200px;
-      margin-left: -100px; margin-top: -100px; /* Center origin */
+      width: 160px;
+      margin-left: -80px; margin-top: -80px; /* Center origin */
       display: flex; flex-direction: column; align-items: center;
       /* Rotate inversely to the pitch so they face the camera */
-      transform: rotateX(-50deg) translateY(50px) translateZ(-50px);
+      transform: rotateX(-15deg) translateY(20px) translateZ(10px);
       opacity: 0;
     }
     /* Pitch Drop Shadow for Player */
     .player-node::before {
       content: ''; position: absolute; bottom: 10px; left: 50%;
-      transform: translateX(-50%) rotateX(50deg) translateZ(-20px);
-      width: 100px; height: 30px; background: rgba(0,0,0,0.6);
-      border-radius: 50%; filter: blur(10px);
+      transform: translateX(-50%) rotateX(15deg) translateZ(-10px);
+      width: 70px; height: 20px; background: rgba(0,0,0,0.6);
+      border-radius: 50%; filter: blur(6px);
     }
     /* Animate players dropping in */
     .lineup-scene-3d.active .player-node {
@@ -285,20 +285,20 @@
     }
 
     .player-number {
-      width: 80px; height: 80px;
+      width: 60px; height: 60px;
       background: linear-gradient(135deg, var(--lineup-color) 0%, #111 150%);
       color: #fff; border-radius: 50%;
-      font-family: var(--font-titles); font-size: 3rem;
+      font-family: var(--font-titles); font-size: 2.2rem;
       display: flex; justify-content: center; align-items: center;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.8), inset 0 2px 10px rgba(255,255,255,0.5);
-      border: 4px solid #fff; margin-bottom: 12px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.8), inset 0 2px 10px rgba(255,255,255,0.5);
+      border: 3px solid #fff; margin-bottom: 8px;
       position: relative; z-index: 2;
     }
     .player-name {
       background: rgba(0,0,0,0.85); color: #fff;
-      padding: 8px 16px; border-radius: 8px; font-weight: bold;
-      text-transform: uppercase; font-size: 1.4rem;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+      padding: 6px 12px; border-radius: 6px; font-weight: bold;
+      text-transform: uppercase; font-size: 1.1rem;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.6);
       border: 2px solid rgba(255,255,255,0.2);
       white-space: nowrap;
       position: relative; z-index: 2;
@@ -329,9 +329,9 @@
     @keyframes lineupDollyOut { 0% { transform: translateZ(0px); opacity: 1; } 100% { transform: translateZ(800px); opacity: 0; } }
     @keyframes headerSlideIn { 0% { transform: translateZ(100px) translateX(-500px); opacity: 0; } 100% { transform: translateZ(100px) translateX(0); opacity: 1; } }
     @keyframes headerSlideOut { 0% { transform: translateZ(100px) translateX(0); opacity: 1; } 100% { transform: translateZ(100px) translateX(-500px); opacity: 0; } }
-    @keyframes pitchRiseIn { 0% { transform: rotateX(50deg) translateZ(-800px) translateY(100px); opacity: 0; } 100% { transform: rotateX(50deg) translateZ(-200px) translateY(100px); opacity: 1; } }
-    @keyframes pitchRiseOut { 0% { transform: rotateX(50deg) translateZ(-200px) translateY(100px); opacity: 1; } 100% { transform: rotateX(50deg) translateZ(-800px) translateY(100px); opacity: 0; } }
-    @keyframes playerDropIn { 0% { transform: rotateX(-50deg) translateY(-300px) translateZ(100px) scale(0.5); opacity: 0; } 100% { transform: rotateX(-50deg) translateY(0) translateZ(0) scale(1); opacity: 1; } }
+    @keyframes pitchRiseIn { 0% { transform: rotateX(15deg) translateZ(-800px) translateY(50px); opacity: 0; } 100% { transform: rotateX(15deg) translateZ(-50px) translateY(0); opacity: 1; } }
+    @keyframes pitchRiseOut { 0% { transform: rotateX(15deg) translateZ(-50px) translateY(0); opacity: 1; } 100% { transform: rotateX(15deg) translateZ(-800px) translateY(50px); opacity: 0; } }
+    @keyframes playerDropIn { 0% { transform: rotateX(-15deg) translateY(-200px) translateZ(100px) scale(0.5); opacity: 0; } 100% { transform: rotateX(-15deg) translateY(0) translateZ(0) scale(1); opacity: 1; } }
     
     @keyframes subsSlideIn { 0% { transform: translateZ(100px) translateX(500px); opacity: 0; } 100% { transform: translateZ(100px) translateX(0); opacity: 1; } }
     @keyframes subsSlideOut { 0% { transform: translateZ(100px) translateX(0); opacity: 1; } 100% { transform: translateZ(100px) translateX(500px); opacity: 0; } }
