@@ -6,7 +6,7 @@
   <title>Football Broadcast Graphic - Cinematic</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@500;700&family=Roboto:wght@500;700;900&family=Montserrat:wght@500;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       --home-color: #ff2a5f;
@@ -174,8 +174,8 @@
     .logo-box { width: 200px; height: 200px; display: flex; justify-content: center; align-items: center; }
     .lineup-logo { max-width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); }
     .coach-box { text-align: center; }
-    .coach-label { font-size: 1.2rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; }
-    .coach-name { font-size: 2.2rem; color: #fff; font-family: var(--font-titles); letter-spacing: 1px; margin-top: 5px;}
+    .coach-label { font-size: 1.5rem; color: #aaa; text-transform: uppercase; letter-spacing: 2px; }
+    .coach-name { font-size: 3rem; color: #fff; font-family: var(--font-titles); letter-spacing: 1px; margin-top: 5px;}
 
     /* Center Col: 3D Pitch */
     .col-center { 
@@ -214,9 +214,9 @@
     }
     
     .pitch-photo { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 3px solid #fff; background: rgba(0,0,0,0.5); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
-    .pitch-name { color: #fff; font-size: 1.2rem; font-weight: bold; text-shadow: 1px 1px 3px #000, 0 0 10px #000; margin-top: 5px; white-space: nowrap; text-transform: uppercase; }
-    .pitch-pos { font-size: 0.8rem; background: var(--lineup-primary); color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-top: -10px; z-index: 2;}
-    .pitch-num { position: absolute; top: -5px; right: -5px; background: #fff; color: #000; font-family: var(--font-titles); width: 25px; height: 25px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 3;}
+    .pitch-name { color: #fff; font-size: 1.6rem; font-weight: bold; text-shadow: 1px 1px 3px #000, 0 0 10px #000, 0 0 15px #000; margin-top: 8px; white-space: nowrap; text-transform: uppercase; }
+    .pitch-pos { font-size: 1.1rem; background: var(--lineup-primary); color: #fff; padding: 4px 12px; border-radius: 12px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-top: -12px; z-index: 2;}
+    .pitch-num { position: absolute; top: -10px; right: -10px; background: #fff; color: #000; font-family: var(--font-titles); width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; box-shadow: 0 4px 8px rgba(0,0,0,0.5); z-index: 3;}
 
 
     /* Right Col: Subs */
@@ -225,7 +225,7 @@
       display: flex; flex-direction: column; 
       background: linear-gradient(to left, rgba(0,0,0,0.6), transparent);
     }
-    .subs-header { font-size: 1.5rem; color: #fff; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase;}
+    .subs-header { font-size: 2rem; color: #fff; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px; text-transform: uppercase;}
     .subs-container { display: flex; flex-direction: column; gap: 10px; }
     
     .sub-item { 
@@ -236,8 +236,8 @@
     .pitch-phase.active .sub-item { animation: slideInRight 0.5s ease forwards; }
     @keyframes slideInRight { 100% { opacity: 1; transform: translateX(0); } }
 
-    .sub-number { background: var(--lineup-primary); color: #fff; font-size: 1.8rem; font-family: var(--font-titles); width: 50px; padding: 10px 0; text-align: center; }
-    .sub-name { color: #fff; padding-left: 15px; font-weight: bold; font-size: 1.2rem; text-transform: uppercase; }
+    .sub-number { background: var(--lineup-primary); color: #fff; font-size: 2rem; font-family: var(--font-titles); width: 60px; padding: 10px 0; text-align: center; }
+    .sub-name { color: #fff; padding-left: 15px; font-weight: bold; font-size: 1.6rem; text-transform: uppercase; }
 
   </style>
 </head>
@@ -340,6 +340,15 @@
         if(data.awayColor) { document.documentElement.style.setProperty('--away-color', data.awayColor); appState.awayColor = data.awayColor; }
         if(data.homeLogoData) { document.getElementById('homeLogoImg').src = data.homeLogoData; appState.homeLogo = data.homeLogoData; }
         if(data.awayLogoData) { document.getElementById('awayLogoImg').src = data.awayLogoData; appState.awayLogo = data.awayLogoData; }
+        if(data.globalFont) {
+          if (data.globalFont.includes('Bebas Neue')) {
+            document.documentElement.style.setProperty('--font-titles', "'Bebas Neue', sans-serif");
+            document.documentElement.style.setProperty('--font-info', "'Rajdhani', sans-serif");
+          } else {
+            document.documentElement.style.setProperty('--font-titles', data.globalFont);
+            document.documentElement.style.setProperty('--font-info', data.globalFont);
+          }
+        }
       }
       
       if (data.type === 'ANIMATE_IN') {

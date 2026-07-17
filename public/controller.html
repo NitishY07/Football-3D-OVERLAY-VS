@@ -178,6 +178,15 @@
 
     <!-- GLOBAL ACTIONS -->
     <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
+    <div class="form-group" style="max-width: 300px; margin: 0 auto 20px;">
+      <label style="text-align:center;">Global Font Family</label>
+      <select id="globalFont" onchange="sendUpdate()">
+        <option value="'Bebas Neue'">Bebas Neue (Default)</option>
+        <option value="'Gilroy', sans-serif">Gilroy</option>
+        <option value="'Roboto', sans-serif">Roboto</option>
+        <option value="'Montserrat', sans-serif">Montserrat</option>
+      </select>
+    </div>
     <button class="btn btn-red" onclick="animateOut()">CLEAR SCREEN (PLAY OUT)</button>
 
   </div>
@@ -298,6 +307,7 @@
         awayColor: document.getElementById('awayColor').value,
         homeCoach: document.getElementById('homeCoach').value,
         awayCoach: document.getElementById('awayCoach').value,
+        globalFont: document.getElementById('globalFont') ? document.getElementById('globalFont').value : null
       };
 
       const homeLogoFile = document.getElementById('homeLogo').files[0];
