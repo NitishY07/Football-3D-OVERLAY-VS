@@ -189,6 +189,36 @@
     .lineup-team-name { font-family: var(--font-titles); font-size: 5rem; letter-spacing: 2px; text-shadow: 0 5px 15px rgba(0,0,0,0.9); }
     .lineup-subtitle { font-size: 1.5rem; color: #aaa; font-weight: bold; text-transform: uppercase; margin-top: -10px; }
 
+    /* Substitutes Panel */
+    .subs-panel {
+      position: absolute; top: 10vh; right: 8vw;
+      width: 320px;
+      background: linear-gradient(135deg, rgba(20,20,30,0.9) 0%, rgba(5,5,10,0.95) 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-top: 4px solid var(--lineup-color);
+      border-radius: 10px; padding: 20px;
+      transform: translateZ(100px) translateX(500px); opacity: 0;
+      display: flex; flex-direction: column; gap: 10px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+    }
+    .lineup-scene-3d.active .subs-panel { animation: subsSlideIn 1s cubic-bezier(0.2, 1, 0.3, 1) forwards 2.5s; }
+    .lineup-scene-3d.exit .subs-panel { animation: subsSlideOut 0.5s cubic-bezier(0.5, 0, 0.2, 1) forwards; }
+
+    .subs-header {
+      font-family: var(--font-titles); font-size: 2.5rem; color: #fff;
+      text-align: center; border-bottom: 2px solid #444; padding-bottom: 10px; margin-bottom: 10px;
+    }
+    .sub-item {
+      display: flex; align-items: center; gap: 15px;
+      font-size: 1.1rem; font-weight: bold; text-transform: uppercase;
+      padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .sub-number {
+      color: var(--lineup-color); font-family: var(--font-titles); font-size: 1.8rem;
+      width: 35px; text-align: right;
+    }
+    .sub-name { color: #fff; }
+
     /* Pitch */
     .pitch-container {
       position: absolute; top: 20vh;
@@ -293,6 +323,9 @@
     @keyframes pitchRiseIn { 0% { transform: rotateX(65deg) translateZ(-800px); opacity: 0; } 100% { transform: rotateX(65deg) translateZ(-300px); opacity: 1; } }
     @keyframes pitchRiseOut { 0% { transform: rotateX(65deg) translateZ(-300px); opacity: 1; } 100% { transform: rotateX(65deg) translateZ(-800px); opacity: 0; } }
     @keyframes playerDropIn { 0% { transform: rotateX(-65deg) translateY(-200px) translateZ(100px) scale(0.5); opacity: 0; } 100% { transform: rotateX(-65deg) translateY(0) translateZ(0) scale(1); opacity: 1; } }
+    
+    @keyframes subsSlideIn { 0% { transform: translateZ(100px) translateX(500px); opacity: 0; } 100% { transform: translateZ(100px) translateX(0); opacity: 1; } }
+    @keyframes subsSlideOut { 0% { transform: translateZ(100px) translateX(0); opacity: 1; } 100% { transform: translateZ(100px) translateX(500px); opacity: 0; } }
 
   </style>
 </head>
@@ -346,11 +379,20 @@
     <div class="lineup-scene-3d" id="lineupScene">
       <div class="lineup-camera-rig">
         
+        <!-- Header -->
         <div class="lineup-header">
           <img src="home_logo.jpg" id="lineupLogoImg" class="lineup-logo">
           <div>
             <div class="lineup-team-name" id="lineupTeamNameText">RED DEVILS</div>
             <div class="lineup-subtitle">Starting XI</div>
+          </div>
+        </div>
+        
+        <!-- Subs Panel -->
+        <div class="subs-panel" id="subsPanel">
+          <div class="subs-header">SUBSTITUTES</div>
+          <div id="subsContainer">
+            <!-- Dynamically populated -->
           </div>
         </div>
 
@@ -410,7 +452,7 @@
 
       if (data.type === 'SHOW_LINEUP') {
         hideScene('scene3d'); // Hide VS
-        renderLineup(data.team, data.formation, data.players);
+        renderLineup(data.team, data.formation, data.players, data.subs);
         showScene('lineupScene');
       }
     };
@@ -432,7 +474,7 @@
       }
     }
 
-    function renderLineup(team, formation, players) {
+    function renderLineup(team, formation, players, subs) {
       // Setup colors and logos
       if (team === 'home') {
         document.documentElement.style.setProperty('--lineup-color', appState.homeColor);
@@ -443,7 +485,22 @@
         document.getElementById('lineupTeamNameText').innerText = appState.awayName;
         document.getElementById('lineupLogoImg').src = appState.awayLogo;
       }
+      
+      // Render Subs
+      const subsContainer = document.getElementById('subsContainer');
+      subsContainer.innerHTML = '';
+      if (subs && subs.length > 0) {
+        subs.forEach(s => {
+          subsContainer.innerHTML += `
+            <div class="sub-item">
+              <div class="sub-number">${s.number}</div>
+              <div class="sub-name">${s.name}</div>
+            </div>
+          `;
+        });
+      }
 
+      // Render Pitch Lineup
       const container = document.getElementById('playerNodesContainer');
       container.innerHTML = ''; // Clear old
 
@@ -455,10 +512,6 @@
       const rows = [1, ...lines]; 
       
       // Pitch Y percentages: 0% is top (away), 100% is bottom (home end)
-      // GK is at 90%
-      // Defenders at 70%
-      // Mids at 45%
-      // Fwds at 20%
       const rowY = rows.length === 4 ? [90, 70, 45, 20] : 
                    rows.length === 5 ? [90, 72, 54, 36, 18] : [90, 60, 30]; // Fallbacks
 
@@ -473,9 +526,6 @@
 
           const p = players[playerIndex];
           
-          // Calculate X position
-          // If 1 player (GK), X=50%
-          // If 4 players, X=20, 40, 60, 80% -> gap is 100/(num+1)
           const gap = 100 / (numPlayersInRow + 1);
           const xPos = gap * (i + 1);
 

@@ -6,7 +6,7 @@
   <title>Football GFX Controller</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1a1a1a; color: #fff; padding: 10px; margin: 0; }
-    .container { max-width: 500px; margin: 0 auto; background: #2a2a2a; padding: 20px; border-radius: 10px; }
+    .container { max-width: 800px; margin: 0 auto; background: #2a2a2a; padding: 20px; border-radius: 10px; }
     h1 { font-size: 1.5rem; margin-top: 0; padding-bottom: 10px; text-align: center; }
     .match-id { font-size: 0.8rem; color: #00ff88; text-align: center; margin-bottom: 15px; }
     
@@ -21,7 +21,8 @@
     .form-group { margin-bottom: 15px; }
     label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #aaa; }
     input[type="text"], textarea, select { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: #fff; border-radius: 5px; box-sizing: border-box; }
-    textarea { resize: vertical; min-height: 180px; font-family: monospace; font-size: 0.85rem;}
+    textarea { resize: vertical; min-height: 150px; font-family: monospace; font-size: 0.85rem;}
+    textarea.subs { min-height: 100px; }
     
     .color-picker { display: flex; align-items: center; gap: 10px; }
     input[type="color"] { width: 50px; height: 40px; border: none; background: transparent; cursor: pointer; }
@@ -31,10 +32,19 @@
     .btn-red { background: #ff2a5f; color: #fff; }
     .btn-green { background: #00ff88; color: #000; }
     .btn-blue { background: #007bff; color: #fff; }
-    .btn-clear { background: #444; color: #fff; padding: 10px; font-size: 1rem; }
     
-    .flex-row { display: flex; gap: 10px; }
+    .flex-row { display: flex; gap: 20px; }
     .flex-row > div { flex: 1; }
+    
+    /* Team Columns for Lineup Tab */
+    .team-col { background: #1e1e1e; padding: 15px; border-radius: 8px; border-top: 4px solid #444;}
+    .team-col.home { border-top-color: #ff2a5f; }
+    .team-col.away { border-top-color: #00e5ff; }
+    .team-col h3 { margin-top: 0; text-align: center; color: #fff; font-size: 1.2rem; }
+    
+    @media (max-width: 600px) {
+      .flex-row { flex-direction: column; gap: 10px; }
+    }
   </style>
 </head>
 <body>
@@ -90,24 +100,29 @@
       
       <button class="btn btn-green" onclick="sendUpdate()">Apply Text & Colors</button>
       <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;" />
-      <div style="display: flex; gap: 10px;">
-        <button class="btn" onclick="animateIn()" style="flex: 1">PLAY IN VS GFX</button>
-      </div>
+      <button class="btn" onclick="animateIn()">PLAY IN VS GFX</button>
     </div>
 
     <!-- TAB 2: LINEUPS -->
     <div id="tab-lineups" class="tab-content">
       
-      <div class="form-group">
-        <label>HOME Lineup (Format: Number Name)</label>
-        <select id="homeFormation" style="margin-bottom: 5px;">
-          <option value="4-3-3">4-3-3</option>
-          <option value="4-4-2">4-4-2</option>
-          <option value="3-5-2">3-5-2</option>
-          <option value="4-2-3-1">4-2-3-1</option>
-          <option value="5-3-2">5-3-2</option>
-        </select>
-        <textarea id="homeLineupText">1 De Gea
+      <div class="flex-row">
+        <!-- HOME COLUMN -->
+        <div class="team-col home">
+          <h3>HOME TEAM</h3>
+          <div class="form-group">
+            <label>Formation</label>
+            <select id="homeFormation">
+              <option value="4-3-3">4-3-3</option>
+              <option value="4-4-2">4-4-2</option>
+              <option value="3-5-2">3-5-2</option>
+              <option value="4-2-3-1">4-2-3-1</option>
+              <option value="5-3-2">5-3-2</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Starting XI (Number Name)</label>
+            <textarea id="homeLineupText">1 De Gea
 29 Wan-Bissaka
 2 Lindelof
 5 Maguire
@@ -118,21 +133,36 @@
 11 Greenwood
 9 Martial
 10 Rashford</textarea>
-        <button class="btn btn-blue" style="margin-top:10px;" onclick="showLineup('home')">SHOW HOME LINEUP</button>
-      </div>
-      
-      <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
-
-      <div class="form-group">
-        <label>AWAY Lineup (Format: Number Name)</label>
-        <select id="awayFormation" style="margin-bottom: 5px;">
-          <option value="4-3-3">4-3-3</option>
-          <option value="4-4-2">4-4-2</option>
-          <option value="3-5-2">3-5-2</option>
-          <option value="4-2-3-1">4-2-3-1</option>
-          <option value="5-3-2">5-3-2</option>
-        </select>
-        <textarea id="awayLineupText">31 Ederson
+          </div>
+          <div class="form-group">
+            <label>Substitutes (Number Name)</label>
+            <textarea id="homeSubsText" class="subs">26 Henderson
+3 Bailly
+27 Telles
+31 Matic
+34 Van de Beek
+21 James
+7 Cavani</textarea>
+          </div>
+          <button class="btn btn-blue" onclick="showLineup('home')">SHOW HOME LINEUP</button>
+        </div>
+        
+        <!-- AWAY COLUMN -->
+        <div class="team-col away">
+          <h3>AWAY TEAM</h3>
+          <div class="form-group">
+            <label>Formation</label>
+            <select id="awayFormation">
+              <option value="4-3-3">4-3-3</option>
+              <option value="4-4-2">4-4-2</option>
+              <option value="3-5-2">3-5-2</option>
+              <option value="4-2-3-1">4-2-3-1</option>
+              <option value="5-3-2">5-3-2</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Starting XI (Number Name)</label>
+            <textarea id="awayLineupText">31 Ederson
 2 Walker
 5 Stones
 3 Dias
@@ -143,13 +173,26 @@
 26 Mahrez
 9 Jesus
 7 Sterling</textarea>
-        <button class="btn btn-blue" style="margin-top:10px;" onclick="showLineup('away')">SHOW AWAY LINEUP</button>
+          </div>
+          <div class="form-group">
+            <label>Substitutes (Number Name)</label>
+            <textarea id="awaySubsText" class="subs">13 Steffen
+14 Laporte
+22 Mendy
+25 Fernandinho
+20 Silva
+47 Foden
+10 Aguero</textarea>
+          </div>
+          <button class="btn btn-blue" onclick="showLineup('away')">SHOW AWAY LINEUP</button>
+        </div>
       </div>
+      
     </div>
 
     <!-- GLOBAL ACTIONS -->
     <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
-    <button class="btn btn-red" onclick="animateOut()">CLEAR / PLAY OUT</button>
+    <button class="btn btn-red" onclick="animateOut()">CLEAR SCREEN (PLAY OUT)</button>
 
   </div>
 
@@ -212,26 +255,25 @@
     }
 
     function parseLineupText(text) {
-      // Split by newlines, remove empty lines
       const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-      
       return lines.map(line => {
-        // Extract number (first word) and name (the rest)
         const firstSpace = line.indexOf(' ');
         if (firstSpace > -1) {
           const number = line.substring(0, firstSpace).trim();
           const name = line.substring(firstSpace + 1).trim();
           return { number, name };
         } else {
-          // Fallback if no number is provided
           return { number: '-', name: line };
         }
       });
     }
 
     function showLineup(team) {
-      const text = document.getElementById(team + 'LineupText').value;
-      const players = parseLineupText(text);
+      const lineupText = document.getElementById(team + 'LineupText').value;
+      const subsText = document.getElementById(team + 'SubsText').value;
+      
+      const players = parseLineupText(lineupText);
+      const subs = parseLineupText(subsText);
       const formation = document.getElementById(team + 'Formation').value;
       
       // Also send the team colors/names so the lineup knows what colors to use
@@ -240,7 +282,8 @@
           type: 'SHOW_LINEUP', 
           team: team, 
           formation: formation,
-          players: players 
+          players: players,
+          subs: subs
         });
       });
     }
