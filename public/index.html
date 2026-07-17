@@ -132,8 +132,7 @@
     }
     
     .player-intro-card {
-      position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.5);
-      width: 450px; height: 550px;
+      width: 320px; height: 450px;
       background: linear-gradient(135deg, var(--lineup-primary) 0%, rgba(10,15,25,0.98) 100%);
       border-radius: 20px; border: 4px solid rgba(255,255,255,0.3);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -145,15 +144,15 @@
     }
     
     @keyframes introSequence {
-      0% { transform: translate(-50%, -50%) scale(0.3) rotateY(90deg); opacity: 0; }
-      10% { transform: translate(-50%, -50%) scale(1.1) rotateY(0deg); opacity: 1; }
-      90% { transform: translate(-50%, -50%) scale(1) rotateY(0deg); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1.5) rotateY(-90deg); opacity: 0; }
+      0% { transform: scale(0.3) rotateY(90deg); opacity: 0; }
+      10% { transform: scale(1.1) rotateY(0deg); opacity: 1; }
+      90% { transform: scale(1) rotateY(0deg); opacity: 1; }
+      100% { transform: scale(1.5) rotateY(-90deg); opacity: 0; }
     }
 
-    .intro-photo { width: 220px; height: 220px; object-fit: cover; border-radius: 50%; border: 6px solid #fff; margin-bottom: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); background: rgba(0,0,0,0.5); }
-    .intro-number { font-family: var(--font-titles); font-size: 6rem; color: #fff; line-height: 0.9; text-shadow: 0 5px 20px rgba(0,0,0,0.8); }
-    .intro-name { font-size: 2.5rem; color: #fff; font-weight: bold; text-transform: uppercase; margin: 10px 0; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .intro-photo { width: 180px; height: 180px; object-fit: cover; border-radius: 50%; border: 6px solid #fff; margin-bottom: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); background: rgba(0,0,0,0.5); }
+    .intro-number { font-family: var(--font-titles); font-size: 5rem; color: #fff; line-height: 0.9; text-shadow: 0 5px 20px rgba(0,0,0,0.8); }
+    .intro-name { font-size: 2rem; color: #fff; font-weight: bold; text-transform: uppercase; margin: 5px 0; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
     .intro-pos { background: #fff; color: var(--lineup-primary); padding: 5px 25px; border-radius: 20px; font-weight: bold; font-size: 1.4rem; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
 
 
@@ -186,7 +185,7 @@
     .pitch-3d { 
       width: 800px; height: 950px; background: #1a422a; 
       border: 4px solid var(--lineup-primary); 
-      transform: rotateX(20deg) translateZ(-50px) scale(0.9);
+      transform: scale(0.9);
       box-shadow: 0 50px 100px rgba(0,0,0,0.9), inset 0 0 80px rgba(0,0,0,0.6);
       position: relative; transform-style: preserve-3d;
     }
@@ -203,15 +202,15 @@
       position: absolute; width: 120px; height: 140px;
       margin-left: -60px; margin-top: -70px;
       display: flex; flex-direction: column; align-items: center;
-      transform: rotateX(-20deg); /* Counter pitch rotation so they stand up */
+      transform: none; /* Counter pitch rotation so they stand up */
       opacity: 0; transform-origin: bottom center;
     }
     .pitch-player.active {
       animation: dropToPitch 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards;
     }
     @keyframes dropToPitch {
-      0% { transform: rotateX(-20deg) translateY(-300px) scale(2); opacity: 0; }
-      100% { transform: rotateX(-20deg) translateY(0) scale(1); opacity: 1; }
+      0% { transform: translateY(-300px) scale(2); opacity: 0; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
     
     .pitch-photo { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 3px solid #fff; background: rgba(0,0,0,0.5); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
@@ -394,35 +393,56 @@
       
       showScene('lineupScene');
 
-      // 1. Generate Intro Cards (Rapid Fire)
-      // Display each for 0.8s, sequentially
+      // 1. Generate Intro Cards (Grouped by formation rows, in reverse)
       const defaultAvatar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='; // transparent pixel fallback if needed, but css handles background
 
-      players.forEach((p, idx) => {
-        const card = document.createElement('div');
-        card.className = 'player-intro-card';
-        card.style.animationDelay = `${idx * 3}s`;
-        
-        const photoSrc = p.photo || defaultAvatar;
-        
-        card.innerHTML = `
-          <img src="${photoSrc}" class="intro-photo" style="${!p.photo ? 'opacity:0;' : ''}">
-          <div class="intro-pos">${p.position}</div>
-          <div class="intro-name">${p.name}</div>
-          <div class="intro-number">${p.number}</div>
-        `;
-        introContainer.appendChild(card);
-        
-        // Trigger animation
-        setTimeout(() => card.classList.add('run-anim'), 10);
-      });
-
-      // Total Intro time = 11 players * 3s = 33s. Wait 34s before showing pitch.
-      const introDurationMs = players.length * 3000 + 500;
-      
       // Prep Pitch Nodes (Hidden initially)
       const lines = formation.split('-').map(Number);
       const rows = [1, ...lines]; // Row 0 = GK
+      
+      const rowGroups = [];
+      let pIdx = 0;
+      rows.forEach(count => {
+        rowGroups.push(players.slice(pIdx, pIdx + count));
+        pIdx += count;
+      });
+      
+      // We want to animate in reverse order (Forwards first down to GK)
+      const animateGroups = rowGroups.reverse();
+      const groupDuration = 3000;
+
+      animateGroups.forEach((group, groupIndex) => {
+        const groupContainer = document.createElement('div');
+        groupContainer.style.position = 'absolute';
+        groupContainer.style.width = '100%';
+        groupContainer.style.height = '100%';
+        groupContainer.style.display = 'flex';
+        groupContainer.style.justifyContent = 'center';
+        groupContainer.style.alignItems = 'center';
+        groupContainer.style.gap = '40px';
+        
+        group.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'player-intro-card';
+          card.style.animationDelay = `${groupIndex * (groupDuration / 1000)}s`;
+          
+          const photoSrc = p.photo || defaultAvatar;
+          card.innerHTML = `
+            <img src="${photoSrc}" class="intro-photo" style="${!p.photo ? 'opacity:0;' : ''}">
+            <div class="intro-pos">${p.position}</div>
+            <div class="intro-name">${p.name}</div>
+            <div class="intro-number">${p.number}</div>
+          `;
+          groupContainer.appendChild(card);
+          
+          setTimeout(() => card.classList.add('run-anim'), 10);
+        });
+        
+        introContainer.appendChild(groupContainer);
+      });
+
+      // Total Intro time = num groups * 3s
+      const introDurationMs = animateGroups.length * groupDuration + 500;
       const rowY = rows.length === 4 ? [92, 70, 45, 20] : rows.length === 5 ? [92, 72, 54, 36, 18] : [92, 60, 30]; 
 
       let playerIndex = 0;
