@@ -141,13 +141,13 @@
       opacity: 0; pointer-events: none;
     }
     .player-intro-card.run-anim {
-      animation: introSequence 0.8s cubic-bezier(0.2, 1, 0.3, 1) forwards;
+      animation: introSequence 3s cubic-bezier(0.2, 1, 0.3, 1) forwards;
     }
     
     @keyframes introSequence {
       0% { transform: translate(-50%, -50%) scale(0.3) rotateY(90deg); opacity: 0; }
-      20% { transform: translate(-50%, -50%) scale(1.1) rotateY(0deg); opacity: 1; }
-      80% { transform: translate(-50%, -50%) scale(1) rotateY(0deg); opacity: 1; }
+      10% { transform: translate(-50%, -50%) scale(1.1) rotateY(0deg); opacity: 1; }
+      90% { transform: translate(-50%, -50%) scale(1) rotateY(0deg); opacity: 1; }
       100% { transform: translate(-50%, -50%) scale(1.5) rotateY(-90deg); opacity: 0; }
     }
 
@@ -159,11 +159,9 @@
 
     /* PHASE 2: FULL PITCH (Fades in after intros) */
     .pitch-phase {
-      position: absolute; width: 1400px; height: 800px;
+      position: absolute; width: 100vw; height: 100vh;
       display: flex; opacity: 0; transition: opacity 1s ease;
-      background: rgba(10, 15, 25, 0.85); border-radius: 20px;
-      border: 2px solid rgba(255,255,255,0.1);
-      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      background: rgba(10, 15, 25, 0.85);
       overflow: hidden;
     }
     .pitch-phase.active { opacity: 1; }
@@ -186,9 +184,9 @@
       perspective: 1200px; overflow: visible;
     }
     .pitch-3d { 
-      width: 600px; height: 750px; background: #1a422a; 
+      width: 800px; height: 950px; background: #1a422a; 
       border: 4px solid var(--lineup-primary); 
-      transform: rotateX(45deg) translateZ(-50px) scale(0.9);
+      transform: rotateX(20deg) translateZ(-50px) scale(0.9);
       box-shadow: 0 50px 100px rgba(0,0,0,0.9), inset 0 0 80px rgba(0,0,0,0.6);
       position: relative; transform-style: preserve-3d;
     }
@@ -196,28 +194,28 @@
     /* Pitch Markings */
     .pitch-lines { position: absolute; inset: 20px; border: 2px solid rgba(255,255,255,0.4); pointer-events: none; }
     .pitch-lines::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: rgba(255,255,255,0.4); }
-    .pitch-lines::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120px; height: 120px; border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; }
-    .penalty-box-top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 250px; height: 100px; border: 2px solid rgba(255,255,255,0.4); border-top: none; }
-    .penalty-box-bottom { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 250px; height: 100px; border: 2px solid rgba(255,255,255,0.4); border-bottom: none; }
+    .pitch-lines::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 160px; height: 160px; border: 2px solid rgba(255,255,255,0.4); border-radius: 50%; }
+    .penalty-box-top { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 350px; height: 120px; border: 2px solid rgba(255,255,255,0.4); border-top: none; }
+    .penalty-box-bottom { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 350px; height: 120px; border: 2px solid rgba(255,255,255,0.4); border-bottom: none; }
 
     /* Player Nodes on Pitch */
     .pitch-player {
-      position: absolute; width: 80px; height: 100px;
-      margin-left: -40px; margin-top: -60px;
+      position: absolute; width: 120px; height: 140px;
+      margin-left: -60px; margin-top: -70px;
       display: flex; flex-direction: column; align-items: center;
-      transform: rotateX(-45deg); /* Counter pitch rotation so they stand up */
+      transform: rotateX(-20deg); /* Counter pitch rotation so they stand up */
       opacity: 0; transform-origin: bottom center;
     }
     .pitch-player.active {
       animation: dropToPitch 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards;
     }
     @keyframes dropToPitch {
-      0% { transform: rotateX(-45deg) translateY(-300px) scale(2); opacity: 0; }
-      100% { transform: rotateX(-45deg) translateY(0) scale(1); opacity: 1; }
+      0% { transform: rotateX(-20deg) translateY(-300px) scale(2); opacity: 0; }
+      100% { transform: rotateX(-20deg) translateY(0) scale(1); opacity: 1; }
     }
     
-    .pitch-photo { width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 3px solid #fff; background: rgba(0,0,0,0.5); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
-    .pitch-name { color: #fff; font-size: 1rem; font-weight: bold; text-shadow: 1px 1px 3px #000, 0 0 10px #000; margin-top: 5px; white-space: nowrap; text-transform: uppercase; }
+    .pitch-photo { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 3px solid #fff; background: rgba(0,0,0,0.5); box-shadow: 0 10px 20px rgba(0,0,0,0.8); }
+    .pitch-name { color: #fff; font-size: 1.2rem; font-weight: bold; text-shadow: 1px 1px 3px #000, 0 0 10px #000; margin-top: 5px; white-space: nowrap; text-transform: uppercase; }
     .pitch-pos { font-size: 0.8rem; background: var(--lineup-primary); color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); margin-top: -10px; z-index: 2;}
     .pitch-num { position: absolute; top: -5px; right: -5px; background: #fff; color: #000; font-family: var(--font-titles); width: 25px; height: 25px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 3;}
 
@@ -403,7 +401,7 @@
       players.forEach((p, idx) => {
         const card = document.createElement('div');
         card.className = 'player-intro-card';
-        card.style.animationDelay = `${idx * 0.8}s`;
+        card.style.animationDelay = `${idx * 3}s`;
         
         const photoSrc = p.photo || defaultAvatar;
         
@@ -419,8 +417,8 @@
         setTimeout(() => card.classList.add('run-anim'), 10);
       });
 
-      // Total Intro time = 11 players * 0.8s = 8.8s. Wait 9s before showing pitch.
-      const introDurationMs = players.length * 800 + 500;
+      // Total Intro time = 11 players * 3s = 33s. Wait 34s before showing pitch.
+      const introDurationMs = players.length * 3000 + 500;
       
       // Prep Pitch Nodes (Hidden initially)
       const lines = formation.split('-').map(Number);
