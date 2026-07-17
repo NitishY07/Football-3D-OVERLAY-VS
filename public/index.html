@@ -11,6 +11,7 @@
     :root {
       --home-color: #ff2a5f;
       --away-color: #00e5ff;
+      --lineup-color: #ff2a5f;
       --font-titles: 'Bebas Neue', sans-serif;
       --font-info: 'Rajdhani', sans-serif;
     }
@@ -19,7 +20,7 @@
 
     body {
       font-family: var(--font-info);
-      background-color: transparent; /* Absolutely transparent for OBS layering */
+      background-color: transparent; 
       color: #ffffff;
       overflow: hidden; 
       width: 100vw;
@@ -32,13 +33,22 @@
       perspective: 2000px;
     }
 
-    /* Cinematic Camera */
+    /* =========================================
+       SCENE 1: VS GRAPHIC (Existing)
+       ========================================= */
+    .scene-3d {
+      position: absolute; width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center;
+      transform-style: preserve-3d;
+      opacity: 0; pointer-events: none;
+    }
+    .scene-3d.active { opacity: 1; pointer-events: auto; }
+    
     .camera-rig {
       position: absolute; width: 100%; height: 100%;
       display: flex; justify-content: center; align-items: center;
       transform-style: preserve-3d; z-index: 10;
     }
-    
     .scene-3d.active .camera-rig { animation: cameraDolly 15s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
     .scene-3d.exit .camera-rig { animation: cameraDollyOut 1.2s cubic-bezier(0.5, 0, 0.2, 1) forwards; }
 
@@ -61,13 +71,6 @@
     .scene-3d.active .floor-shadow { opacity: 1; transition-delay: 1s; }
     .scene-3d.exit .floor-shadow { opacity: 0; transition-delay: 0s; transition-duration: 0.5s; }
 
-    .scene-3d {
-      position: absolute; width: 100%; height: 100%;
-      display: flex; justify-content: center; align-items: center;
-      transform-style: preserve-3d;
-    }
-    
-    /* Panels */
     .team-panel {
       position: absolute; width: 420px; height: 600px;
       backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -80,8 +83,7 @@
     .team-panel::after {
       content: ''; position: absolute; inset: 0;
       border-radius: 20px; z-index: -2;
-      transform: translateZ(-20px); 
-      background: #050508;
+      transform: translateZ(-20px); background: #050508;
     }
 
     .team-panel::before {
@@ -94,7 +96,6 @@
       transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); 
     }
     .home-panel::before { background: linear-gradient(135deg, var(--home-color), rgba(255,255,255,0.2), transparent); box-shadow: 0 0 40px var(--home-color); }
-    
     .scene-3d.active .home-panel { animation: cinematicFlyInLeft 2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
     .scene-3d.exit .home-panel { animation: cinematicFlyOutLeft 1.2s cubic-bezier(0.8, 0, 0.2, 1) forwards 0.2s; }
 
@@ -103,15 +104,12 @@
       transform: translateX(1000px) translateZ(1000px) rotateY(-90deg);
     }
     .away-panel::before { background: linear-gradient(135deg, var(--away-color), rgba(255,255,255,0.2), transparent); box-shadow: 0 0 40px var(--away-color); }
-    
     .scene-3d.active .away-panel { animation: cinematicFlyInRight 2s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.2s; }
     .scene-3d.exit .away-panel { animation: cinematicFlyOutRight 1.2s cubic-bezier(0.8, 0, 0.2, 1) forwards 0.1s; }
 
-    /* Logos */
     .team-logo-container {
       width: 360px; height: 360px; display: flex; justify-content: center; align-items: center;
-      transform: translateZ(50px) scale(0) rotateY(180deg); 
-      opacity: 0; will-change: transform, opacity;
+      transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0; will-change: transform, opacity;
     }
     .scene-3d.active .team-logo-container { animation: logoSpinIn 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.27) forwards 1s; }
     .scene-3d.exit .team-logo-container { animation: logoSpinOut 1s cubic-bezier(0.8, 0, 0.2, 1) forwards 0s; }
@@ -121,10 +119,8 @@
       box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 20px rgba(255,255,255,0.2);
     }
 
-    /* Team Names */
     .team-name {
-      font-family: var(--font-titles);
-      font-size: 5rem; letter-spacing: 2px;
+      font-family: var(--font-titles); font-size: 5rem; letter-spacing: 2px;
       margin-top: 20px; text-align: center;
       transform: translateZ(80px) translateY(100px) rotateX(-90deg);
       opacity: 0; color: #fff; transform-origin: bottom;
@@ -135,7 +131,6 @@
     .home-panel .team-name { text-shadow: 0 1px 0 #999, 0 2px 0 #888, 0 3px 0 #777, 0 4px 0 #666, 0 5px 0 #555, 0 20px 20px rgba(0,0,0,0.9), 0 0 30px var(--home-color); }
     .away-panel .team-name { text-shadow: 0 1px 0 #999, 0 2px 0 #888, 0 3px 0 #777, 0 4px 0 #666, 0 5px 0 #555, 0 20px 20px rgba(0,0,0,0.9), 0 0 30px var(--away-color); }
 
-    /* Central Info */
     .center-panel {
       position: absolute; width: 450px; display: flex; flex-direction: column; align-items: center;
       transform: translateY(-400px) scale(0.5); opacity: 0; transform-style: preserve-3d;
@@ -145,17 +140,14 @@
 
     .match-info-glass {
       background: linear-gradient(135deg, rgba(20, 20, 30, 0.95) 0%, rgba(5, 5, 10, 1) 100%);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-top: 4px solid #fff;
+      border: 1px solid rgba(255,255,255,0.1); border-top: 4px solid #fff;
       padding: 15px 40px; border-radius: 10px; text-align: center;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-      width: 100%; margin-bottom: 20px; transform-style: preserve-3d;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.9); width: 100%; margin-bottom: 20px; transform-style: preserve-3d;
     }
 
     .league-name { font-size: 1.4rem; color: #aaa; letter-spacing: 5px; font-weight: 700; transform: translateZ(20px); }
     .match-day { font-family: var(--font-titles); font-size: 3rem; color: #fff; transform: translateZ(40px); letter-spacing: 2px; }
 
-    /* VS Badge */
     .vs-badge {
       font-family: var(--font-titles); font-size: 8rem; line-height: 1;
       color: #fff; text-shadow: 0 2px 0 #ccc, 0 4px 0 #aaa, 0 6px 0 #888, 0 8px 0 #666, 0 30px 30px rgba(0,0,0,0.9);
@@ -165,75 +157,151 @@
     .scene-3d.active .vs-badge { animation: vsSlamIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.2) forwards 2s; }
     .scene-3d.exit .vs-badge { animation: vsSlamOut 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards 0s; }
 
-    /* ==================================================
-       ANIMATION KEYFRAMES 
-       ================================================== */
-       
-    /* IN ANIMATIONS */
-    @keyframes cameraDolly {
-      0% { transform: translateZ(600px); }
-      100% { transform: translateZ(0px); }
+    /* =========================================
+       SCENE 2: LINEUPS GRAPHIC (New)
+       ========================================= */
+    .lineup-scene-3d {
+      position: absolute; width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center;
+      transform-style: preserve-3d;
+      opacity: 0; pointer-events: none;
     }
-    @keyframes cinematicFlyInLeft {
-      0% { transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); opacity: 0; }
-      100% { transform: translateX(-500px) translateZ(50px) rotateY(15deg) rotateX(2deg); opacity: 1; }
+    .lineup-scene-3d.active { opacity: 1; pointer-events: auto; }
+
+    .lineup-camera-rig {
+      width: 100%; height: 100%; position: absolute;
+      transform-style: preserve-3d;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    @keyframes cinematicFlyInRight {
-      0% { transform: translateX(1000px) translateZ(1000px) rotateY(-90deg); opacity: 0; }
-      100% { transform: translateX(500px) translateZ(50px) rotateY(-15deg) rotateX(2deg); opacity: 1; }
+    .lineup-scene-3d.active .lineup-camera-rig { animation: lineupDolly 15s cubic-bezier(0.2, 1, 0.5, 1) forwards; }
+    .lineup-scene-3d.exit .lineup-camera-rig { animation: lineupDollyOut 1s cubic-bezier(0.5, 0, 0.2, 1) forwards; }
+
+    /* Header for Lineups */
+    .lineup-header {
+      position: absolute; top: 10vh; left: 10vw;
+      display: flex; align-items: center; gap: 20px;
+      transform: translateZ(100px) translateX(-500px); opacity: 0;
     }
-    @keyframes logoSpinIn {
-      0% { transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0; }
-      100% { transform: translateZ(140px) scale(1) rotateY(0deg); opacity: 1; }
+    .lineup-scene-3d.active .lineup-header { animation: headerSlideIn 1s cubic-bezier(0.2, 1, 0.3, 1) forwards 1s; }
+    .lineup-scene-3d.exit .lineup-header { animation: headerSlideOut 0.5s cubic-bezier(0.5, 0, 0.2, 1) forwards; }
+
+    .lineup-logo { width: 120px; height: 120px; border-radius: 50%; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+    .lineup-team-name { font-family: var(--font-titles); font-size: 5rem; letter-spacing: 2px; text-shadow: 0 5px 15px rgba(0,0,0,0.9); }
+    .lineup-subtitle { font-size: 1.5rem; color: #aaa; font-weight: bold; text-transform: uppercase; margin-top: -10px; }
+
+    /* Pitch */
+    .pitch-container {
+      position: absolute; top: 20vh;
+      width: 1000px; height: 1200px;
+      transform-style: preserve-3d;
+      transform: rotateX(65deg) translateZ(-300px);
+      opacity: 0;
     }
-    @keyframes textFlipUp {
-      0% { transform: translateZ(80px) translateY(100px) rotateX(-90deg); opacity: 0; }
-      100% { transform: translateZ(100px) translateY(0) rotateX(0deg); opacity: 1; }
+    .lineup-scene-3d.active .pitch-container { animation: pitchRiseIn 1.5s cubic-bezier(0.2, 1, 0.3, 1) forwards 0.5s; }
+    .lineup-scene-3d.exit .pitch-container { animation: pitchRiseOut 0.8s cubic-bezier(0.5, 0, 0.2, 1) forwards; }
+
+    .pitch-3d {
+      width: 100%; height: 100%;
+      background: linear-gradient(0deg, #105928 0%, #157836 100%);
+      border: 6px solid rgba(255,255,255,0.8);
+      position: relative;
+      box-shadow: 0 100px 150px rgba(0,0,0,0.8), inset 0 0 100px rgba(0,0,0,0.5);
     }
-    @keyframes centerDropIn {
-      0% { transform: translateY(-600px) translateZ(0px) scale(0.5); opacity: 0; }
-      100% { transform: translateY(0) translateZ(150px) scale(1); opacity: 1; }
+    /* Pitch Stripes */
+    .pitch-3d::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 100px, transparent 100px, transparent 200px);
     }
-    @keyframes vsSlamIn {
-      0% { transform: translateZ(400px) scale(4); opacity: 0; }
-      100% { transform: translateZ(120px) scale(1); opacity: 1; }
+    /* Pitch markings */
+    .pitch-lines {
+      position: absolute; inset: 0;
+      border: 4px solid rgba(255,255,255,0.6);
+      margin: 20px; pointer-events: none;
+    }
+    .pitch-lines::before { /* Center Line */
+      content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.6);
+    }
+    .pitch-lines::after { /* Center Circle */
+      content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 200px; height: 200px; border: 4px solid rgba(255,255,255,0.6); border-radius: 50%;
+    }
+    
+    .penalty-box-bottom {
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 500px; height: 200px; border: 4px solid rgba(255,255,255,0.6); border-bottom: none;
     }
 
-    /* OUT ANIMATIONS (PLAY OUT) - CLEAN AND CLASSY */
-    @keyframes cameraDollyOut {
-      0% { transform: translateZ(0px); }
-      100% { transform: translateZ(600px); } /* Mirrors the intro dolly */
+    /* Player Nodes */
+    .player-node {
+      position: absolute;
+      transform-style: preserve-3d;
+      width: 160px;
+      margin-left: -80px; margin-top: -80px; /* Center origin */
+      display: flex; flex-direction: column; align-items: center;
+      /* Rotate inversely to the pitch so they face the camera */
+      transform: rotateX(-65deg) translateY(50px) translateZ(-50px);
+      opacity: 0;
     }
-    @keyframes cinematicFlyOutLeft {
-      0% { transform: translateX(-500px) translateZ(50px) rotateY(15deg) rotateX(2deg); opacity: 1; }
-      100% { transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); opacity: 0; }
+    /* Animate players dropping in */
+    .lineup-scene-3d.active .player-node {
+      animation: playerDropIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
-    @keyframes cinematicFlyOutRight {
-      0% { transform: translateX(500px) translateZ(50px) rotateY(-15deg) rotateX(2deg); opacity: 1; }
-      100% { transform: translateX(1000px) translateZ(1000px) rotateY(-90deg); opacity: 0; }
+
+    .player-number {
+      width: 60px; height: 60px;
+      background: linear-gradient(135deg, var(--lineup-color) 0%, #111 150%);
+      color: #fff; border-radius: 50%;
+      font-family: var(--font-titles); font-size: 2.2rem;
+      display: flex; justify-content: center; align-items: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.6), inset 0 2px 5px rgba(255,255,255,0.4);
+      border: 3px solid #fff; margin-bottom: 8px;
     }
-    @keyframes logoSpinOut {
-      0% { transform: translateZ(140px) scale(1) rotateY(0deg); opacity: 1; }
-      100% { transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0; }
+    .player-name {
+      background: rgba(0,0,0,0.85); color: #fff;
+      padding: 6px 12px; border-radius: 6px; font-weight: bold;
+      text-transform: uppercase; font-size: 1.1rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.2);
+      white-space: nowrap;
     }
-    @keyframes textFlipDown {
-      0% { transform: translateZ(100px) translateY(0) rotateX(0deg); opacity: 1; }
-      100% { transform: translateZ(80px) translateY(100px) rotateX(-90deg); opacity: 0; }
-    }
-    @keyframes centerDropOut {
-      0% { transform: translateY(0) translateZ(150px) scale(1); opacity: 1; }
-      100% { transform: translateY(-600px) translateZ(0px) scale(0.5); opacity: 0; }
-    }
-    @keyframes vsSlamOut {
-      0% { transform: translateZ(120px) scale(1); opacity: 1; }
-      100% { transform: translateZ(400px) scale(4); opacity: 0; }
-    }
+
+    /* =========================================
+       ANIMATION KEYFRAMES 
+       ========================================= */
+       
+    /* VS ANIMATIONS */
+    @keyframes cameraDolly { 0% { transform: translateZ(600px); } 100% { transform: translateZ(0px); } }
+    @keyframes cinematicFlyInLeft { 0% { transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); opacity: 0; } 100% { transform: translateX(-500px) translateZ(50px) rotateY(15deg) rotateX(2deg); opacity: 1; } }
+    @keyframes cinematicFlyInRight { 0% { transform: translateX(1000px) translateZ(1000px) rotateY(-90deg); opacity: 0; } 100% { transform: translateX(500px) translateZ(50px) rotateY(-15deg) rotateX(2deg); opacity: 1; } }
+    @keyframes logoSpinIn { 0% { transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0; } 100% { transform: translateZ(140px) scale(1) rotateY(0deg); opacity: 1; } }
+    @keyframes textFlipUp { 0% { transform: translateZ(80px) translateY(100px) rotateX(-90deg); opacity: 0; } 100% { transform: translateZ(100px) translateY(0) rotateX(0deg); opacity: 1; } }
+    @keyframes centerDropIn { 0% { transform: translateY(-600px) translateZ(0px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) translateZ(150px) scale(1); opacity: 1; } }
+    @keyframes vsSlamIn { 0% { transform: translateZ(400px) scale(4); opacity: 0; } 100% { transform: translateZ(120px) scale(1); opacity: 1; } }
+    @keyframes cameraDollyOut { 0% { transform: translateZ(0px); } 100% { transform: translateZ(600px); opacity: 0;} }
+    @keyframes cinematicFlyOutLeft { 0% { transform: translateX(-500px) translateZ(50px) rotateY(15deg) rotateX(2deg); opacity: 1; } 100% { transform: translateX(-1000px) translateZ(1000px) rotateY(90deg); opacity: 0; } }
+    @keyframes cinematicFlyOutRight { 0% { transform: translateX(500px) translateZ(50px) rotateY(-15deg) rotateX(2deg); opacity: 1; } 100% { transform: translateX(1000px) translateZ(1000px) rotateY(-90deg); opacity: 0; } }
+    @keyframes logoSpinOut { 0% { transform: translateZ(140px) scale(1) rotateY(0deg); opacity: 1; } 100% { transform: translateZ(50px) scale(0) rotateY(180deg); opacity: 0; } }
+    @keyframes textFlipDown { 0% { transform: translateZ(100px) translateY(0) rotateX(0deg); opacity: 1; } 100% { transform: translateZ(80px) translateY(100px) rotateX(-90deg); opacity: 0; } }
+    @keyframes centerDropOut { 0% { transform: translateY(0) translateZ(150px) scale(1); opacity: 1; } 100% { transform: translateY(-600px) translateZ(0px) scale(0.5); opacity: 0; } }
+    @keyframes vsSlamOut { 0% { transform: translateZ(120px) scale(1); opacity: 1; } 100% { transform: translateZ(400px) scale(4); opacity: 0; } }
+
+    /* LINEUP ANIMATIONS */
+    @keyframes lineupDolly { 0% { transform: translateZ(400px) translateY(100px); } 100% { transform: translateZ(0px) translateY(0px); } }
+    @keyframes lineupDollyOut { 0% { transform: translateZ(0px); opacity: 1; } 100% { transform: translateZ(800px); opacity: 0; } }
+    @keyframes headerSlideIn { 0% { transform: translateZ(100px) translateX(-500px); opacity: 0; } 100% { transform: translateZ(100px) translateX(0); opacity: 1; } }
+    @keyframes headerSlideOut { 0% { transform: translateZ(100px) translateX(0); opacity: 1; } 100% { transform: translateZ(100px) translateX(-500px); opacity: 0; } }
+    @keyframes pitchRiseIn { 0% { transform: rotateX(65deg) translateZ(-800px); opacity: 0; } 100% { transform: rotateX(65deg) translateZ(-300px); opacity: 1; } }
+    @keyframes pitchRiseOut { 0% { transform: rotateX(65deg) translateZ(-300px); opacity: 1; } 100% { transform: rotateX(65deg) translateZ(-800px); opacity: 0; } }
+    @keyframes playerDropIn { 0% { transform: rotateX(-65deg) translateY(-200px) translateZ(100px) scale(0.5); opacity: 0; } 100% { transform: rotateX(-65deg) translateY(0) translateZ(0) scale(1); opacity: 1; } }
+
   </style>
 </head>
 <body>
   <div class="broadcast-container">
-    <!-- Removed Stadium Bg & Fog overlays entirely for true transparency -->
-
+    
+    <!-- =========================================
+         SCENE 1: VS GRAPHIC 
+         ========================================= -->
     <div class="scene-3d" id="scene3d">
       <div class="camera-rig">
         <div class="gfx-wrapper">
@@ -271,55 +339,163 @@
         </div>
       </div>
     </div>
+
+    <!-- =========================================
+         SCENE 2: LINEUPS 
+         ========================================= -->
+    <div class="lineup-scene-3d" id="lineupScene">
+      <div class="lineup-camera-rig">
+        
+        <div class="lineup-header">
+          <img src="home_logo.jpg" id="lineupLogoImg" class="lineup-logo">
+          <div>
+            <div class="lineup-team-name" id="lineupTeamNameText">RED DEVILS</div>
+            <div class="lineup-subtitle">Starting XI</div>
+          </div>
+        </div>
+
+        <div class="pitch-container">
+          <div class="pitch-3d">
+            <div class="pitch-lines">
+              <div class="penalty-box-bottom"></div>
+            </div>
+            <div id="playerNodesContainer">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </div>
 
   <script>
-    // Parse URL parameter to join specific match room, default to 'default'
+    // State Cache for Logos and Colors since Lineup needs them too
+    const appState = {
+      homeName: 'HOME TEAM', homeColor: '#ff2a5f', homeLogo: 'home_logo.jpg',
+      awayName: 'AWAY TEAM', awayColor: '#00e5ff', awayLogo: 'away_logo.jpg'
+    };
+
     const urlParams = new URLSearchParams(window.location.search);
     const matchId = urlParams.get('match') || 'default';
-    
-    // Connect to SSE Server (No dependencies!)
     const eventSource = new EventSource(`/events?match=${matchId}`);
     
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
       
       if (data.type === 'UPDATE_TEXT') {
-        if(data.homeName) document.getElementById('homeNameText').innerText = data.homeName;
-        if(data.awayName) document.getElementById('awayNameText').innerText = data.awayName;
+        if(data.homeName) { document.getElementById('homeNameText').innerText = data.homeName; appState.homeName = data.homeName; }
+        if(data.awayName) { document.getElementById('awayNameText').innerText = data.awayName; appState.awayName = data.awayName; }
         if(data.leagueName) document.getElementById('leagueNameText').innerText = data.leagueName;
         if(data.matchday) document.getElementById('matchdayText').innerText = data.matchday;
         if(data.kickoffTime) document.getElementById('kickoffTimeText').innerText = data.kickoffTime;
         
-        // Update custom CSS colors
-        if(data.homeColor) document.documentElement.style.setProperty('--home-color', data.homeColor);
-        if(data.awayColor) document.documentElement.style.setProperty('--away-color', data.awayColor);
+        if(data.homeColor) { document.documentElement.style.setProperty('--home-color', data.homeColor); appState.homeColor = data.homeColor; }
+        if(data.awayColor) { document.documentElement.style.setProperty('--away-color', data.awayColor); appState.awayColor = data.awayColor; }
 
-        // Update Logos if Base64 data is provided
-        if(data.homeLogoData) document.getElementById('homeLogoImg').src = data.homeLogoData;
-        if(data.awayLogoData) document.getElementById('awayLogoImg').src = data.awayLogoData;
+        if(data.homeLogoData) { document.getElementById('homeLogoImg').src = data.homeLogoData; appState.homeLogo = data.homeLogoData; }
+        if(data.awayLogoData) { document.getElementById('awayLogoImg').src = data.awayLogoData; appState.awayLogo = data.awayLogoData; }
       }
       
       if (data.type === 'ANIMATE_IN') {
-        const scene = document.getElementById('scene3d');
-        scene.classList.remove('exit');
-        scene.classList.remove('active');
-        void scene.offsetWidth; 
-        scene.classList.add('active');
+        hideScene('lineupScene');
+        showScene('scene3d');
       }
       
       if (data.type === 'ANIMATE_OUT') {
-        const scene = document.getElementById('scene3d');
+        hideScene('scene3d');
+        hideScene('lineupScene');
+      }
+
+      if (data.type === 'SHOW_LINEUP') {
+        hideScene('scene3d'); // Hide VS
+        renderLineup(data.team, data.formation, data.players);
+        showScene('lineupScene');
+      }
+    };
+
+    function showScene(id) {
+      const scene = document.getElementById(id);
+      scene.classList.remove('exit');
+      scene.classList.remove('active');
+      void scene.offsetWidth; 
+      scene.classList.add('active');
+    }
+
+    function hideScene(id) {
+      const scene = document.getElementById(id);
+      if(scene.classList.contains('active')) {
         scene.classList.remove('active');
         void scene.offsetWidth; 
         scene.classList.add('exit');
       }
-    };
+    }
 
-    // Auto animate in
-    setTimeout(() => {
-      document.getElementById('scene3d').classList.add('active');
-    }, 500);
+    function renderLineup(team, formation, players) {
+      // Setup colors and logos
+      if (team === 'home') {
+        document.documentElement.style.setProperty('--lineup-color', appState.homeColor);
+        document.getElementById('lineupTeamNameText').innerText = appState.homeName;
+        document.getElementById('lineupLogoImg').src = appState.homeLogo;
+      } else {
+        document.documentElement.style.setProperty('--lineup-color', appState.awayColor);
+        document.getElementById('lineupTeamNameText').innerText = appState.awayName;
+        document.getElementById('lineupLogoImg').src = appState.awayLogo;
+      }
+
+      const container = document.getElementById('playerNodesContainer');
+      container.innerHTML = ''; // Clear old
+
+      // Parse formation (e.g. "4-3-3" -> [4, 3, 3])
+      const lines = formation.split('-').map(Number);
+      
+      // Calculate layout points
+      // Row 0 is always GK
+      const rows = [1, ...lines]; 
+      
+      // Pitch Y percentages: 0% is top (away), 100% is bottom (home end)
+      // GK is at 90%
+      // Defenders at 70%
+      // Mids at 45%
+      // Fwds at 20%
+      const rowY = rows.length === 4 ? [90, 70, 45, 20] : 
+                   rows.length === 5 ? [90, 72, 54, 36, 18] : [90, 60, 30]; // Fallbacks
+
+      let playerIndex = 0;
+      let delay = 1.0; // CSS animation delay
+
+      rows.forEach((numPlayersInRow, rIndex) => {
+        const yPos = rowY[rIndex];
+        
+        for (let i = 0; i < numPlayersInRow; i++) {
+          if (playerIndex >= players.length) break;
+
+          const p = players[playerIndex];
+          
+          // Calculate X position
+          // If 1 player (GK), X=50%
+          // If 4 players, X=20, 40, 60, 80% -> gap is 100/(num+1)
+          const gap = 100 / (numPlayersInRow + 1);
+          const xPos = gap * (i + 1);
+
+          const node = document.createElement('div');
+          node.className = 'player-node';
+          node.style.left = `${xPos}%`;
+          node.style.top = `${yPos}%`;
+          node.style.animationDelay = `${delay}s`;
+
+          node.innerHTML = `
+            <div class="player-number">${p.number}</div>
+            <div class="player-name">${p.name}</div>
+          `;
+          
+          container.appendChild(node);
+          playerIndex++;
+          delay += 0.15; // Stagger animation
+        }
+      });
+    }
   </script>
 </body>
 </html>

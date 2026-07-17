@@ -5,19 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Football GFX Controller</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1a1a1a; color: #fff; padding: 20px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #1a1a1a; color: #fff; padding: 10px; margin: 0; }
     .container { max-width: 500px; margin: 0 auto; background: #2a2a2a; padding: 20px; border-radius: 10px; }
-    h1 { font-size: 1.5rem; margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 10px; }
-    .match-id { font-size: 0.9rem; color: #00ff88; margin-top: -5px; margin-bottom: 15px; }
+    h1 { font-size: 1.5rem; margin-top: 0; padding-bottom: 10px; text-align: center; }
+    .match-id { font-size: 0.8rem; color: #00ff88; text-align: center; margin-bottom: 15px; }
+    
+    /* Tabs */
+    .tabs { display: flex; margin-bottom: 15px; border-bottom: 2px solid #444; }
+    .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; color: #aaa; font-weight: bold; }
+    .tab.active { color: #fff; border-bottom: 3px solid #00e5ff; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
     .form-group { margin-bottom: 15px; }
     label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; color: #aaa; }
-    input[type="text"] { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: #fff; border-radius: 5px; box-sizing: border-box; }
+    input[type="text"], textarea, select { width: 100%; padding: 10px; background: #333; border: 1px solid #444; color: #fff; border-radius: 5px; box-sizing: border-box; }
+    textarea { resize: vertical; min-height: 180px; font-family: monospace; font-size: 0.85rem;}
+    
     .color-picker { display: flex; align-items: center; gap: 10px; }
     input[type="color"] { width: 50px; height: 40px; border: none; background: transparent; cursor: pointer; }
-    input[type="file"] { margin-top: 5px; color: #ccc; }
+    input[type="file"] { margin-top: 5px; color: #ccc; font-size: 0.8rem;}
+    
     .btn { display: block; width: 100%; padding: 15px; background: #00e5ff; color: #000; border: none; font-size: 1.1rem; font-weight: bold; border-radius: 5px; cursor: pointer; margin-bottom: 10px; }
     .btn-red { background: #ff2a5f; color: #fff; }
     .btn-green { background: #00ff88; color: #000; }
+    .btn-blue { background: #007bff; color: #fff; }
+    .btn-clear { background: #444; color: #fff; padding: 10px; font-size: 1rem; }
+    
     .flex-row { display: flex; gap: 10px; }
     .flex-row > div { flex: 1; }
   </style>
@@ -27,59 +42,129 @@
     <h1>Broadcast Controller</h1>
     <div class="match-id" id="matchIdDisplay">Match ID: default</div>
     
-    <div class="flex-row">
-      <div class="form-group">
-        <label>Home Team</label>
-        <input type="text" id="homeName" value="RED DEVILS" />
-        <div class="color-picker">
-          <input type="color" id="homeColor" value="#ff2a5f">
-          <label style="margin:0">Theme Color</label>
+    <!-- Tab Navigation -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('vs')">VS Graphic</div>
+      <div class="tab" onclick="switchTab('lineups')">Lineups</div>
+    </div>
+
+    <!-- TAB 1: VS GRAPHIC -->
+    <div id="tab-vs" class="tab-content active">
+      <div class="flex-row">
+        <div class="form-group">
+          <label>Home Team</label>
+          <input type="text" id="homeName" value="RED DEVILS" />
+          <div class="color-picker">
+            <input type="color" id="homeColor" value="#ff2a5f">
+            <label style="margin:0">Color</label>
+          </div>
+          <label style="margin-top:10px">Custom Logo:</label>
+          <input type="file" id="homeLogo" accept="image/*" />
         </div>
-        <label style="margin-top:10px">Upload Custom Logo:</label>
-        <input type="file" id="homeLogo" accept="image/*" />
+        
+        <div class="form-group">
+          <label>Away Team</label>
+          <input type="text" id="awayName" value="BLUE EAGLES" />
+          <div class="color-picker">
+            <input type="color" id="awayColor" value="#00e5ff">
+            <label style="margin:0">Color</label>
+          </div>
+          <label style="margin-top:10px">Custom Logo:</label>
+          <input type="file" id="awayLogo" accept="image/*" />
+        </div>
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid #444; margin: 10px 0;" />
+      <div class="form-group">
+        <label>League Name</label>
+        <input type="text" id="leagueName" value="PREMIER CHAMPIONSHIP" />
+      </div>
+      <div class="form-group">
+        <label>Matchday Info</label>
+        <input type="text" id="matchday" value="MATCHDAY 24" />
+      </div>
+      <div class="form-group">
+        <label>Time</label>
+        <input type="text" id="kickoffTime" value="20:45 CET" />
       </div>
       
-      <div class="form-group">
-        <label>Away Team</label>
-        <input type="text" id="awayName" value="BLUE EAGLES" />
-        <div class="color-picker">
-          <input type="color" id="awayColor" value="#00e5ff">
-          <label style="margin:0">Theme Color</label>
-        </div>
-        <label style="margin-top:10px">Upload Custom Logo:</label>
-        <input type="file" id="awayLogo" accept="image/*" />
+      <button class="btn btn-green" onclick="sendUpdate()">Apply Text & Colors</button>
+      <hr style="border: 0; border-top: 1px solid #444; margin: 15px 0;" />
+      <div style="display: flex; gap: 10px;">
+        <button class="btn" onclick="animateIn()" style="flex: 1">PLAY IN VS GFX</button>
       </div>
     </div>
 
-    <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
+    <!-- TAB 2: LINEUPS -->
+    <div id="tab-lineups" class="tab-content">
+      
+      <div class="form-group">
+        <label>HOME Lineup (Format: Number Name)</label>
+        <select id="homeFormation" style="margin-bottom: 5px;">
+          <option value="4-3-3">4-3-3</option>
+          <option value="4-4-2">4-4-2</option>
+          <option value="3-5-2">3-5-2</option>
+          <option value="4-2-3-1">4-2-3-1</option>
+          <option value="5-3-2">5-3-2</option>
+        </select>
+        <textarea id="homeLineupText">1 De Gea
+29 Wan-Bissaka
+2 Lindelof
+5 Maguire
+23 Shaw
+39 McTominay
+17 Fred
+18 Fernandes
+11 Greenwood
+9 Martial
+10 Rashford</textarea>
+        <button class="btn btn-blue" style="margin-top:10px;" onclick="showLineup('home')">SHOW HOME LINEUP</button>
+      </div>
+      
+      <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
 
-    <div class="form-group">
-      <label>League Name</label>
-      <input type="text" id="leagueName" value="PREMIER CHAMPIONSHIP" />
+      <div class="form-group">
+        <label>AWAY Lineup (Format: Number Name)</label>
+        <select id="awayFormation" style="margin-bottom: 5px;">
+          <option value="4-3-3">4-3-3</option>
+          <option value="4-4-2">4-4-2</option>
+          <option value="3-5-2">3-5-2</option>
+          <option value="4-2-3-1">4-2-3-1</option>
+          <option value="5-3-2">5-3-2</option>
+        </select>
+        <textarea id="awayLineupText">31 Ederson
+2 Walker
+5 Stones
+3 Dias
+27 Cancelo
+16 Rodri
+8 Gundogan
+17 De Bruyne
+26 Mahrez
+9 Jesus
+7 Sterling</textarea>
+        <button class="btn btn-blue" style="margin-top:10px;" onclick="showLineup('away')">SHOW AWAY LINEUP</button>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Matchday Info</label>
-      <input type="text" id="matchday" value="MATCHDAY 24" />
-    </div>
-    <div class="form-group">
-      <label>Time</label>
-      <input type="text" id="kickoffTime" value="20:45 CET" />
-    </div>
-    
-    <button class="btn btn-green" onclick="sendUpdate()">Apply Text & Colors</button>
-    
-    <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
 
-    <div style="display: flex; gap: 10px;">
-      <button class="btn" onclick="animateIn()" style="flex: 1">PLAY IN</button>
-      <button class="btn btn-red" onclick="animateOut()" style="flex: 1">PLAY OUT</button>
-    </div>
+    <!-- GLOBAL ACTIONS -->
+    <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;" />
+    <button class="btn btn-red" onclick="animateOut()">CLEAR / PLAY OUT</button>
+
   </div>
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const matchId = urlParams.get('match') || 'default';
     document.getElementById('matchIdDisplay').innerText = `Controlling Match ID: ${matchId}`;
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
 
     function getBase64(file) {
       return new Promise((resolve, reject) => {
@@ -119,13 +204,45 @@
       if (homeLogoFile) {
         payload.homeLogoData = await getBase64(homeLogoFile);
       }
-      
       const awayLogoFile = document.getElementById('awayLogo').files[0];
       if (awayLogoFile) {
         payload.awayLogoData = await getBase64(awayLogoFile);
       }
-
       sendActionToServer(payload);
+    }
+
+    function parseLineupText(text) {
+      // Split by newlines, remove empty lines
+      const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+      
+      return lines.map(line => {
+        // Extract number (first word) and name (the rest)
+        const firstSpace = line.indexOf(' ');
+        if (firstSpace > -1) {
+          const number = line.substring(0, firstSpace).trim();
+          const name = line.substring(firstSpace + 1).trim();
+          return { number, name };
+        } else {
+          // Fallback if no number is provided
+          return { number: '-', name: line };
+        }
+      });
+    }
+
+    function showLineup(team) {
+      const text = document.getElementById(team + 'LineupText').value;
+      const players = parseLineupText(text);
+      const formation = document.getElementById(team + 'Formation').value;
+      
+      // Also send the team colors/names so the lineup knows what colors to use
+      sendUpdate().then(() => {
+        sendActionToServer({ 
+          type: 'SHOW_LINEUP', 
+          team: team, 
+          formation: formation,
+          players: players 
+        });
+      });
     }
 
     function animateIn() {
@@ -136,6 +253,7 @@
       sendActionToServer({ type: 'ANIMATE_OUT' });
     }
 
+    // Initialize with text update
     window.onload = () => sendUpdate();
   </script>
 </body>
