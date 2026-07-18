@@ -376,7 +376,8 @@
           team: team, 
           formation: formation,
           players: players,
-          subs: subs
+          subs: subs,
+          theme: document.getElementById('graphicsTheme') ? document.getElementById('graphicsTheme').value : 'cinematic'
         });
       } catch (err) {
         console.error("Error sending lineup:", err);
