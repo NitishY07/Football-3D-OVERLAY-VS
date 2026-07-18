@@ -119,6 +119,10 @@
             <input type="text" id="homeCoach" value="Ole Gunnar Solskjaer" />
           </div>
           <div class="form-group">
+            <label>Coach Photo (Optional)</label>
+            <input type="file" id="homeCoachPhoto" accept="image/*" />
+          </div>
+          <div class="form-group">
             <label>Formation</label>
             <select id="homeFormation">
               <option value="4-3-3">4-3-3</option>
@@ -148,6 +152,10 @@
           <div class="form-group">
             <label>Coach Name</label>
             <input type="text" id="awayCoach" value="Pep Guardiola" />
+          </div>
+          <div class="form-group">
+            <label>Coach Photo (Optional)</label>
+            <input type="file" id="awayCoachPhoto" accept="image/*" />
           </div>
           <div class="form-group">
             <label>Formation</label>
@@ -327,6 +335,12 @@
       
       const awayLogoFile = document.getElementById('awayLogo').files[0];
       if (awayLogoFile) payload.awayLogoData = await getBase64(awayLogoFile);
+
+      const homeCoachPhotoFile = document.getElementById('homeCoachPhoto').files[0];
+      if (homeCoachPhotoFile) payload.homeCoachPhoto = await getBase64(homeCoachPhotoFile);
+
+      const awayCoachPhotoFile = document.getElementById('awayCoachPhoto').files[0];
+      if (awayCoachPhotoFile) payload.awayCoachPhoto = await getBase64(awayCoachPhotoFile);
       
       await sendActionToServer(payload);
     }
