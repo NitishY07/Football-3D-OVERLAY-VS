@@ -360,6 +360,15 @@
     
     .pl-intro-coach-img { width: 120%; height: auto; max-height: 90%; object-fit: contain; transform: scale(1); transition: transform 4s linear; }
     .pl-intro-screen.active .pl-intro-coach-img { transform: scale(1.05); }
+
+    .pl-intro-coach-name {
+      position: absolute; bottom: 40px; left: 40px; 
+      background: rgba(0,0,0,0.8); color: #fff; text-transform: uppercase;
+      font-family: var(--font-titles); font-size: 3rem; font-weight: bold;
+      padding: 10px 20px; border-radius: 8px;
+      opacity: 0; transform: translateY(20px); transition: all 1s 1s ease;
+    }
+    .pl-intro-screen.active .pl-intro-coach-name.show { opacity: 1; transform: translateY(0); }
     
     .pl-intro-logo { width: 80%; max-height: 80%; object-fit: contain; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8); opacity: 0; transition: all 1s ease;}
     .pl-intro-screen.active .pl-intro-logo { transform: translate(-50%, -50%) scale(1); }
@@ -476,6 +485,7 @@
       <div class="pl-intro-left">
         <img src="" id="plIntroLogo" class="pl-intro-logo">
         <img src="" id="plIntroCoach" class="pl-intro-coach-img">
+        <div id="plIntroCoachName" class="pl-intro-coach-name"></div>
       </div>
       <div class="pl-intro-right">
         <div id="plIntroBgText" class="pl-intro-bg-text"></div>
@@ -519,6 +529,8 @@
       if (data.type === 'UPDATE_TEXT') {
         if(data.homeName) { document.getElementById('homeNameText').innerText = data.homeName; appState.homeName = data.homeName; }
         if(data.awayName) { document.getElementById('awayNameText').innerText = data.awayName; appState.awayName = data.awayName; }
+        if(data.homeShortName) appState.homeShortName = data.homeShortName;
+        if(data.awayShortName) appState.awayShortName = data.awayShortName;
         if(data.leagueName) { document.getElementById('leagueNameText').innerText = data.leagueName; appState.leagueName = data.leagueName; }
         if(data.matchday) document.getElementById('matchdayText').innerText = data.matchday;
         if(data.kickoffTime) document.getElementById('kickoffTimeText').innerText = data.kickoffTime;
@@ -664,26 +676,25 @@
         plSubsContainer.innerHTML = subsHtml;
       }
 
-      // Activate Scene
-      showScene('lineupScenePL');
-      
       const introScreen = document.getElementById('plIntroScreen');
       const introLogo = document.getElementById('plIntroLogo');
       const introCoach = document.getElementById('plIntroCoach');
+      const introCoachName = document.getElementById('plIntroCoachName');
       const introBgText = document.getElementById('plIntroBgText');
       const introTeamName = document.getElementById('plIntroTeamName');
 
       // Setup Intro Screen
       const teamNameStr = team === 'home' ? appState.homeName : appState.awayName;
+      const shortNameStr = team === 'home' ? (appState.homeShortName || teamNameStr.substring(0,3)) : (appState.awayShortName || teamNameStr.substring(0,3));
       const coachPhotoData = team === 'home' ? appState.homeCoachPhoto : appState.awayCoachPhoto;
+      const coachNameStr = team === 'home' ? appState.homeCoach : appState.awayCoach;
       
       introTeamName.innerText = teamNameStr;
       
       // Repeating background text
       let bgTextStr = '';
-      const shortName = teamNameStr.substring(0, 3);
       for(let i=0; i<6; i++) {
-        bgTextStr += shortName + ' ' + shortName + ' ' + shortName + '\n';
+        bgTextStr += shortNameStr + ' ' + shortNameStr + ' ' + shortNameStr + '\n';
       }
       introBgText.innerText = bgTextStr;
 
@@ -691,13 +702,20 @@
         introCoach.src = coachPhotoData;
         introCoach.style.opacity = 1;
         introLogo.style.opacity = 0;
+        if (coachNameStr) {
+          introCoachName.innerText = coachNameStr;
+          introCoachName.classList.add('show');
+        } else {
+          introCoachName.classList.remove('show');
+        }
       } else {
         introCoach.style.opacity = 0;
+        introCoachName.classList.remove('show');
         introLogo.src = team === 'home' ? appState.homeLogo : appState.awayLogo;
         introLogo.style.opacity = 1;
       }
 
-      // Show Phase 0 Intro Screen
+      // Show Phase 0 Intro Screen (Wait, pitch shouldn't be active yet)
       introScreen.classList.add('active');
 
       // Wait 4 seconds for Intro
@@ -705,6 +723,10 @@
       introScreen.classList.remove('active');
 
       // Delay for intro to fade out, then pitch fades in naturally
+      await new Promise(r => setTimeout(r, 500));
+      
+      // Activate Scene (Pitch fades in)
+      showScene('lineupScenePL');
       await new Promise(r => setTimeout(r, 500));
       
       // Group names for sidebar

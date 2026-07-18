@@ -119,6 +119,10 @@
             <input type="text" id="homeCoach" value="Ole Gunnar Solskjaer" />
           </div>
           <div class="form-group">
+            <label>Team Short Name</label>
+            <input type="text" id="homeShortName" value="MUN" maxlength="4" />
+          </div>
+          <div class="form-group">
             <label>Coach Photo (Optional)</label>
             <input type="file" id="homeCoachPhoto" accept="image/*" />
           </div>
@@ -152,6 +156,10 @@
           <div class="form-group">
             <label>Coach Name</label>
             <input type="text" id="awayCoach" value="Pep Guardiola" />
+          </div>
+          <div class="form-group">
+            <label>Team Short Name</label>
+            <input type="text" id="awayShortName" value="MCI" maxlength="4" />
           </div>
           <div class="form-group">
             <label>Coach Photo (Optional)</label>
@@ -326,6 +334,8 @@
         awayColor: document.getElementById('awayColor').value,
         homeCoach: document.getElementById('homeCoach').value,
         awayCoach: document.getElementById('awayCoach').value,
+        homeShortName: document.getElementById('homeShortName') ? document.getElementById('homeShortName').value : '',
+        awayShortName: document.getElementById('awayShortName') ? document.getElementById('awayShortName').value : '',
         globalFont: document.getElementById('globalFont') ? document.getElementById('globalFont').value : null,
         theme: document.getElementById('graphicsTheme') ? document.getElementById('graphicsTheme').value : 'cinematic'
       };
