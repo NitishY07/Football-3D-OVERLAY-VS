@@ -297,7 +297,7 @@
     .pl-player-node.active { opacity: 1; }
     
     .pl-card { 
-      width: 90px; height: 130px; background: var(--lineup-primary);
+      width: 100px; height: 140px; background: var(--lineup-primary);
       border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
       box-shadow: 0 10px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
     }
@@ -314,8 +314,8 @@
     .pl-player-node.focus .pl-card-name { font-size: 1.3rem; padding: 10px; background: transparent; text-align: left; width: 100%; position: absolute; bottom: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
 
     .pl-player-node.phase3 .pl-card-photo { opacity: 1; }
-    .pl-player-node.phase3 .pl-card-num { font-size: 1.8rem; position: absolute; bottom: 25px; right: 5px; background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 4px; margin: 0;}
-    .pl-player-node.phase3 .pl-card-name { font-size: 0.9rem; }
+    .pl-player-node.phase3 .pl-card-num { font-size: 2.2rem; position: absolute; bottom: 30px; right: 5px; background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 4px; margin: 0;}
+    .pl-player-node.phase3 .pl-card-name { font-size: 1rem; }
 
     .pl-sidebar {
       width: 400px; height: 100%; background: var(--lineup-primary);
@@ -328,14 +328,14 @@
 
     .pl-sidebar-logo { width: 150px; height: 150px; object-fit: contain; margin-top: 50px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); z-index: 10; position: relative;}
     .pl-sidebar-text { 
-      font-family: var(--font-titles); font-size: 8.5rem; color: #fff; font-weight: 900; 
+      font-family: var(--font-titles); font-size: 11rem; color: rgba(255,255,255,0.4); font-weight: 900; 
       writing-mode: vertical-rl; transform: rotate(180deg); 
-      position: absolute; right: 20px; top: 0; bottom: 0; margin: auto; height: 100%;
-      text-align: center; display: flex; align-items: center; justify-content: center;
+      position: absolute; right: 20px; top: 250px; bottom: 0; margin: 0; height: calc(100% - 250px);
+      text-align: center;
       opacity: 0; transition: opacity 0.5s; text-transform: uppercase; white-space: nowrap;
       z-index: 1;
     }
-    .pl-sidebar-text.active { opacity: 0.15; }
+    .pl-sidebar-text.active { opacity: 1; }
 
     .pl-subs-container { width: 100%; margin-top: 50px; opacity: 0; transition: opacity 0.5s; }
     .pl-subs-container.active { opacity: 1; }
@@ -744,16 +744,6 @@
         node.classList.add('phase3');
       });
 
-      plSidebarText.innerText = 'SUBSTITUTES';
-      plSidebarText.style.writingMode = 'horizontal-tb';
-      plSidebarText.style.transform = 'none';
-      plSidebarText.style.fontSize = '3rem';
-      plSidebarText.style.position = 'relative';
-      plSidebarText.style.top = '0';
-      plSidebarText.style.right = '0';
-      plSidebarText.style.marginTop = '20px';
-      // plSidebarText.classList.add('active');
-      // Wait actually I will just use the subs container for text
       plSubsContainer.classList.add('active');
 
     }
