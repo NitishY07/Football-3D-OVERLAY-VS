@@ -532,8 +532,6 @@
         </div>
       </div>
       <div class="pl-sidebar" id="plSidebar">
-        <img src="" id="plTeamLogo" class="pl-sidebar-logo">
-        <div id="plSidebarText" class="pl-sidebar-text"></div>
         <div id="plSubsContainer" class="pl-subs-container"></div>
       </div>
     </div>
@@ -627,9 +625,7 @@
       const plScene = document.getElementById('lineupScenePL');
       const plNodes = document.getElementById('plPlayerNodes');
       const plSidebar = document.getElementById('plSidebar');
-      const plSidebarText = document.getElementById('plSidebarText');
       const plSubsContainer = document.getElementById('plSubsContainer');
-      const plTeamLogo = document.getElementById('plTeamLogo');
 
       // Reset DOM
       hideScene('lineupScene');
@@ -644,9 +640,6 @@
       const plTopLeftTeam = document.getElementById('plTopLeftTeam');
       plGroupText.classList.remove('active');
       plTopLeftTeam.classList.remove('active');
-
-      // Logo
-      plTeamLogo.src = team === 'home' ? appState.homeLogo : appState.awayLogo;
 
       // Group Players into 4 distinct groups: GK, DEF, MID, FWD
       const lines = formation.split('-').map(Number);
@@ -697,12 +690,12 @@
           node.style.left = `${centerX}%`;
           node.style.top = `50%`;
 
-          const defaultAvatar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+          const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23222"/><circle cx="50" cy="35" r="25" fill="%23555"/><path d="M10 100 Q 50 50 90 100" fill="%23555"/></svg>';
           const photoSrc = p.data.photo || defaultAvatar;
 
           node.innerHTML = `
             <div class="pl-card">
-              <img src="${photoSrc}" class="pl-card-photo" style="${!p.data.photo ? 'opacity:0;' : ''}">
+              <img src="${photoSrc}" class="pl-card-photo">
               <div class="pl-card-num">${p.data.number}</div>
               <div class="pl-card-name">${p.data.name}</div>
             </div>
