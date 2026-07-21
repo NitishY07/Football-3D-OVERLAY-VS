@@ -307,51 +307,49 @@
     }
     
     .pl-card { 
-      width: 120px; height: 170px; background: var(--lineup-primary);
-      border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3); position: relative; transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+      width: 140px; height: 180px; background: transparent;
+      display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+      position: relative; transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
     }
-    .pl-card-num { font-size: 2.5rem; color: #fff; font-weight: 900; margin-bottom: 5px; font-family: var(--font-titles); line-height: 1; transition: all 0.5s; z-index: 2;}
-    .pl-card-name { font-size: 1rem; color: #fff; font-weight: bold; width: 100%; text-align: center; padding: 4px 0; background: rgba(0,0,0,0.4); transition: all 0.5s; z-index: 2; white-space: nowrap;}
-    .pl-card-photo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.5s; z-index: 1;}
+    .pl-card-num {
+      position: absolute; top: 10px; left: -10px;
+      width: 40px; height: 40px; background: #ccff00; color: #000;
+      font-size: 2rem; font-weight: 900; font-family: var(--font-titles);
+      display: flex; justify-content: center; align-items: center;
+      z-index: 5; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); transition: all 0.5s;
+    }
+    .pl-card-photo {
+      width: 100%; height: 140px; object-fit: contain; z-index: 1; transition: all 0.5s;
+    }
+    .pl-card-name {
+      width: 100%; padding: 8px 0; background: #000; color: #fff;
+      font-size: 1.2rem; font-weight: bold; text-align: center; text-transform: uppercase;
+      z-index: 2; margin-top: -10px; font-family: var(--font-titles); letter-spacing: 1px; transition: all 0.5s; white-space: nowrap;
+    }
 
     #plPlayerNodes.focus-mode .pl-player-node { opacity: 0.3; }
     #plPlayerNodes.focus-mode .pl-player-node.focus { opacity: 1; z-index: 100; transform: translate(-50%, -50%) scale(1.5); }
     
-    .pl-player-node.focus .pl-card { width: 160px; height: 230px; border-radius: 12px; }
-    .pl-player-node.focus .pl-card-photo { opacity: 1; }
-    .pl-player-node.focus .pl-card-num { font-size: 4.5rem; position: absolute; top: 5px; left: 10px; opacity: 0.5; margin: 0; }
-    .pl-player-node.focus .pl-card-name { font-size: 1.3rem; padding: 10px; background: transparent; text-align: left; width: 100%; position: absolute; bottom: 0; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
-
-    .pl-player-node.phase3 .pl-card-photo { opacity: 1; }
-    .pl-player-node.phase3 .pl-card-num { font-size: 3rem; position: absolute; bottom: 35px; right: 5px; background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 4px; margin: 0;}
-    .pl-player-node.phase3 .pl-card-name { font-size: 1.2rem; }
+    .pl-player-node.focus .pl-card { width: 160px; height: 230px; }
+    
+    .pl-player-node.phase3 .pl-card-num { font-size: 1.8rem; width: 35px; height: 35px; top: 15px; left: -5px;}
+    .pl-player-node.phase3 .pl-card-name { font-size: 1rem; padding: 6px 0; margin-top: -5px;}
+    .pl-player-node.phase3 .pl-card-photo { height: 120px; }
 
     .pl-sidebar {
       width: 400px; height: 100%; background: transparent;
-      display: flex; flex-direction: column; align-items: center; padding: 40px;
-      position: relative; transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
-      transform: translateX(100%);
+      position: absolute; right: 0; top: 0;
+      display: flex; flex-direction: column; align-items: flex-end; padding: 80px 60px;
+      pointer-events: none; transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+      transform: translateX(100%); z-index: 100;
     }
     .pl-sidebar.active { transform: translateX(0); }
 
-    .pl-sidebar-logo { width: 150px; height: 150px; object-fit: contain; margin-top: 50px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); z-index: 10; position: relative;}
-    .pl-sidebar-text { 
-      font-family: var(--font-titles); font-size: 11rem; color: rgba(255,255,255,0.4); font-weight: 900; 
-      writing-mode: vertical-rl; transform: rotate(180deg); 
-      position: absolute; right: 20px; top: 250px; bottom: 0; margin: 0; height: calc(100% - 250px);
-      text-align: center;
-      opacity: 0; transition: opacity 0.5s; text-transform: uppercase; white-space: nowrap;
-      z-index: 1;
-    }
-    .pl-sidebar-text.active { opacity: 1; }
-
-    .pl-subs-container { width: 100%; margin-top: 50px; opacity: 0; transition: opacity 0.5s; }
+    .pl-subs-container { width: 100%; opacity: 0; transition: opacity 0.5s; display: flex; flex-direction: column; align-items: flex-end; }
     .pl-subs-container.active { opacity: 1; }
-    .pl-subs-header { font-size: 3rem; color: #fff; font-weight: bold; margin-bottom: 25px; font-family: var(--font-titles);}
-    .pl-sub-item { display: flex; align-items: center; margin-bottom: 15px; }
-    .pl-sub-num { font-size: 2.2rem; color: #fff; font-weight: 900; width: 60px; font-family: var(--font-titles); }
-    .pl-sub-name { font-size: 2rem; color: #fff; font-weight: 500; }
+    .pl-subs-header { font-size: 3.5rem; color: #ff2a5f; font-weight: 900; margin-bottom: 20px; font-family: var(--font-titles); text-shadow: 0 4px 10px rgba(0,0,0,0.5);}
+    .pl-sub-item { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+    .pl-sub-name { font-size: 2.2rem; color: #fff; font-weight: 500; font-family: var(--font-titles); text-transform: uppercase; text-shadow: 0 2px 8px rgba(0,0,0,0.8);}
 
     /* GROUP AND TEAM TEXT */
     .pl-group-text {
@@ -364,11 +362,10 @@
     .pl-group-text.active { opacity: 1; transform: translateX(-50%) translateY(0); }
 
     .pl-top-left-team {
-      position: absolute; top: 40px; left: 40px; background: var(--lineup-primary);
-      color: #fff; font-family: var(--font-titles); font-size: 3rem; font-weight: 900;
-      padding: 10px 30px; text-transform: uppercase; letter-spacing: 2px;
+      position: absolute; top: 60px; left: 80px; 
+      color: #ccff00; font-family: var(--font-titles); font-size: 4rem; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 5px 15px rgba(0,0,0,0.8);
       opacity: 0; transform: translateX(-50px); transition: all 0.8s ease; z-index: 100;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-radius: 8px;
     }
     .pl-top-left-team.active { opacity: 1; transform: translateX(0); }
 
@@ -655,10 +652,10 @@
       const lines = formation.split('-').map(Number);
       
       const groupData = [
-        { label: 'GOALKEEPER', players: [] },
-        { label: 'DEFENDERS', players: [] },
-        { label: 'MIDFIELDERS', players: [] },
-        { label: 'FORWARDS', players: [] }
+        { label: 'GK', players: [] },
+        { label: 'DEFENDER', players: [] },
+        { label: 'MIDFIELDER', players: [] },
+        { label: 'FORWARD', players: [] }
       ];
 
       let playerIndex = 0;
@@ -721,7 +718,6 @@
         subs.forEach(s => {
           subsHtml += `
             <div class="pl-sub-item">
-              <div class="pl-sub-num">${s.number}</div>
               <div class="pl-sub-name">${s.name}</div>
             </div>
           `;
