@@ -290,11 +290,21 @@
     #plPlayerNodes { position: absolute; width: 100%; height: 100%; top: 0; left: 0; }
 
     .pl-player-node {
-      position: absolute; transform: translate(-50%, -50%); 
-      transition: all 0.5s ease;
+      position: absolute; transform: translate(-50%, -50%) scale(0); 
+      transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
       display: flex; flex-direction: column; align-items: center; opacity: 0;
+      z-index: 10;
     }
     .pl-player-node.active { opacity: 1; }
+    
+    .pl-player-node.center-focus {
+       transform: translate(-50%, -50%) scale(1.6);
+       z-index: 100; opacity: 1;
+    }
+    .pl-player-node.placed {
+       transform: translate(-50%, -50%) scale(1);
+       opacity: 1;
+    }
     
     .pl-card { 
       width: 120px; height: 170px; background: var(--lineup-primary);
@@ -318,13 +328,12 @@
     .pl-player-node.phase3 .pl-card-name { font-size: 1.2rem; }
 
     .pl-sidebar {
-      width: 400px; height: 100%; background: var(--lineup-primary);
-      border-top-left-radius: 40px; border-bottom-left-radius: 40px;
+      width: 400px; height: 100%; background: transparent;
       display: flex; flex-direction: column; align-items: center; padding: 40px;
-      box-shadow: -10px 0 30px rgba(0,0,0,0.2); position: relative; transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+      position: relative; transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
       transform: translateX(100%);
     }
-    .lineup-scene-pl.active .pl-sidebar { transform: translateX(0); }
+    .pl-sidebar.active { transform: translateX(0); }
 
     .pl-sidebar-logo { width: 150px; height: 150px; object-fit: contain; margin-top: 50px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3)); z-index: 10; position: relative;}
     .pl-sidebar-text { 
@@ -343,6 +352,25 @@
     .pl-sub-item { display: flex; align-items: center; margin-bottom: 15px; }
     .pl-sub-num { font-size: 2.2rem; color: #fff; font-weight: 900; width: 60px; font-family: var(--font-titles); }
     .pl-sub-name { font-size: 2rem; color: #fff; font-weight: 500; }
+
+    /* GROUP AND TEAM TEXT */
+    .pl-group-text {
+      position: absolute; top: 10%; left: 50%; transform: translateX(-50%) translateY(-20px);
+      font-family: var(--font-titles); font-size: 5rem; color: #fff; font-weight: 900;
+      text-transform: uppercase; letter-spacing: 5px;
+      opacity: 0; transition: all 0.5s ease; z-index: 200;
+      text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    }
+    .pl-group-text.active { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .pl-top-left-team {
+      position: absolute; top: 40px; left: 40px; background: var(--lineup-primary);
+      color: #fff; font-family: var(--font-titles); font-size: 3rem; font-weight: 900;
+      padding: 10px 30px; text-transform: uppercase; letter-spacing: 2px;
+      opacity: 0; transform: translateX(-50px); transition: all 0.8s ease; z-index: 100;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3); border-radius: 8px;
+    }
+    .pl-top-left-team.active { opacity: 1; transform: translateX(0); }
 
     /* PREMIER LEAGUE INTRO SCREEN */
     .pl-intro-screen {
@@ -494,6 +522,9 @@
     </div>
 
     <div class="lineup-scene-pl" id="lineupScenePL">
+      <div id="plGroupText" class="pl-group-text"></div>
+      <div id="plTopLeftTeam" class="pl-top-left-team"></div>
+      
       <div class="pl-pitch-area">
         <div class="pl-pitch-container">
           <div class="pl-line-center"></div>
@@ -609,57 +640,79 @@
       plNodes.innerHTML = '';
       plSubsContainer.innerHTML = '';
       plSubsContainer.classList.remove('active');
-      plSidebarText.classList.remove('active');
-      plNodes.className = 'focus-mode'; // Start in focus mode
+      plSidebar.classList.remove('active');
       document.getElementById('plIntroScreen').classList.remove('active');
+
+      const plGroupText = document.getElementById('plGroupText');
+      const plTopLeftTeam = document.getElementById('plTopLeftTeam');
+      plGroupText.classList.remove('active');
+      plTopLeftTeam.classList.remove('active');
 
       // Logo
       plTeamLogo.src = team === 'home' ? appState.homeLogo : appState.awayLogo;
 
-      // Group Players by Formation Rows (GK first)
+      // Group Players into 4 distinct groups: GK, DEF, MID, FWD
       const lines = formation.split('-').map(Number);
-      const rows = [1, ...lines]; 
-      const rowGroups = [];
-      let pIdx = 0;
-      rows.forEach(count => {
-        rowGroups.push(players.slice(pIdx, pIdx + count));
-        pIdx += count;
-      });
-
-      // Prepare DOM Nodes for all players
-      const rowY = rows.length === 4 ? [92, 70, 45, 20] : rows.length === 5 ? [92, 72, 54, 36, 18] : [92, 60, 30]; 
-      const playerElements = [];
+      
+      const groupData = [
+        { label: 'GOALKEEPER', players: [] },
+        { label: 'DEFENDERS', players: [] },
+        { label: 'MIDFIELDERS', players: [] },
+        { label: 'FORWARDS', players: [] }
+      ];
 
       let playerIndex = 0;
+      const rows = [1, ...lines];
+      const rowY = rows.length === 4 ? [92, 70, 45, 20] : rows.length === 5 ? [92, 72, 54, 36, 18] : [92, 60, 30];
+
       rows.forEach((numPlayersInRow, rIndex) => {
         const yPos = rowY[rIndex];
-        const groupElements = [];
+        
+        let gIndex = 0;
+        if (rIndex === 0) gIndex = 0;
+        else if (rIndex === 1) gIndex = 1;
+        else if (rIndex === rows.length - 1) gIndex = 3;
+        else gIndex = 2;
+
         for (let i = 0; i < numPlayersInRow; i++) {
           if (playerIndex >= players.length) break;
           const p = players[playerIndex];
           const gap = 100 / (numPlayersInRow + 1);
           const xPos = gap * (i + 1);
+          
+          groupData[gIndex].players.push({ data: p, pitchX: xPos, pitchY: yPos });
+          playerIndex++;
+        }
+      });
 
+      // Prepare DOM Nodes for all players
+      groupData.forEach(g => {
+        const count = g.players.length;
+        const spacing = 16; 
+        const startLeft = 50 - ((count - 1) * spacing / 2);
+
+        g.nodes = [];
+        g.players.forEach((p, idx) => {
           const node = document.createElement('div');
           node.className = 'pl-player-node';
-          node.style.left = `${xPos}%`;
-          node.style.top = `${yPos}%`;
+          const centerX = startLeft + (idx * spacing);
+          
+          node.style.left = `${centerX}%`;
+          node.style.top = `50%`;
 
           const defaultAvatar = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-          const photoSrc = p.photo || defaultAvatar;
+          const photoSrc = p.data.photo || defaultAvatar;
 
           node.innerHTML = `
             <div class="pl-card">
-              <img src="${photoSrc}" class="pl-card-photo" style="${!p.photo ? 'opacity:0;' : ''}">
-              <div class="pl-card-num">${p.number}</div>
-              <div class="pl-card-name">${p.name}</div>
+              <img src="${photoSrc}" class="pl-card-photo" style="${!p.data.photo ? 'opacity:0;' : ''}">
+              <div class="pl-card-num">${p.data.number}</div>
+              <div class="pl-card-name">${p.data.name}</div>
             </div>
           `;
           plNodes.appendChild(node);
-          groupElements.push(node);
-          playerIndex++;
-        }
-        playerElements.push(groupElements);
+          g.nodes.push({ element: node, pitchX: p.pitchX, pitchY: p.pitchY, centerX: centerX });
+        });
       });
 
       // Prepare Subs
@@ -690,8 +743,8 @@
       const coachNameStr = team === 'home' ? appState.homeCoach : appState.awayCoach;
       
       introTeamName.innerText = teamNameStr;
+      plTopLeftTeam.innerText = teamNameStr;
       
-      // Repeating background text
       let bgTextStr = '';
       for(let i=0; i<6; i++) {
         bgTextStr += shortNameStr + ' ' + shortNameStr + ' ' + shortNameStr + '\n';
@@ -715,57 +768,53 @@
         introLogo.style.opacity = 1;
       }
 
-      // Show Phase 0 Intro Screen (Wait, pitch shouldn't be active yet)
+      // Show Phase 0 Intro Screen
       introScreen.classList.add('active');
 
-      // Wait 4 seconds for Intro
       await new Promise(r => setTimeout(r, 4000));
       introScreen.classList.remove('active');
 
-      // Delay for intro to fade out, then pitch fades in naturally
       await new Promise(r => setTimeout(r, 500));
       
       // Activate Scene (Pitch fades in)
       showScene('lineupScenePL');
       await new Promise(r => setTimeout(r, 500));
       
-      // Group names for sidebar
-      const groupNames = ['GOALKEEPER', 'DEFENDERS', 'MIDFIELDERS', 'FORWARDS', 'ATTACKERS'];
-
-      // Iterate through groups (Forwards first down to GK)
-      const animateGroups = playerElements.slice().reverse();
-      const groupLabels = groupNames.slice(0, rows.length).reverse();
-
-      for (let i = 0; i < animateGroups.length; i++) {
-        const group = animateGroups[i];
+      // Animate Groups
+      for (let i = 0; i < groupData.length; i++) {
+        const g = groupData[i];
+        if (g.nodes.length === 0) continue;
         
-        // Show group label
-        plSidebarText.innerText = groupLabels[i];
-        plSidebarText.classList.add('active');
-
-        // Fade in and focus players
-        group.forEach((node, idx) => {
-          setTimeout(() => {
-            node.classList.add('active');
-            node.classList.add('focus');
-          }, idx * 100);
+        plGroupText.innerText = g.label;
+        plGroupText.classList.add('active');
+        
+        // Pop up in center
+        g.nodes.forEach(n => {
+          n.element.classList.add('center-focus');
         });
-
-        await new Promise(r => setTimeout(r, 3000));
         
-        // Remove focus
-        group.forEach(node => node.classList.remove('focus'));
-        plSidebarText.classList.remove('active');
+        await new Promise(r => setTimeout(r, 2000));
         
-        await new Promise(r => setTimeout(r, 500)); // wait for label to fade out
+        // Move to pitch
+        g.nodes.forEach(n => {
+          n.element.classList.remove('center-focus');
+          n.element.classList.add('placed');
+          n.element.style.left = `${n.pitchX}%`;
+          n.element.style.top = `${n.pitchY}%`;
+        });
+        
+        plGroupText.classList.remove('active');
+        
+        await new Promise(r => setTimeout(r, 1000));
       }
 
-      // Phase 3: Show all on pitch small, and show subs
-      plNodes.className = ''; // remove focus-mode
+      // Phase 3: Show Top Left Team Name and Sidebar
+      plTopLeftTeam.classList.add('active');
       document.querySelectorAll('.pl-player-node').forEach(node => {
         node.classList.add('phase3');
       });
 
+      plSidebar.classList.add('active');
       plSubsContainer.classList.add('active');
 
     }
